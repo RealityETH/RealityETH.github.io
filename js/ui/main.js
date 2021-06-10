@@ -2,44 +2,12 @@
 
 'use strict';
 
-const rc_question = require('@realitio/realitio-lib/formatters/question.js');
-const rc_template = require('@realitio/realitio-lib/formatters/template.js');
+const rc_question = require('@reality.eth/reality-eth-lib/formatters/question.js');
+const rc_template = require('@reality.eth/reality-eth-lib/formatters/template.js');
+const rc_contracts = require('@reality.eth/contracts');
 
-const rc_json_by_curr = {
-    'ETH': require('@realitio/realitio-contracts/truffle/build/contracts/Realitio.json'),
-   // 'DAI': require('@realitio/realitio-contracts/truffle/build/contracts/Realitio.DAI.json'),
-    'TRST': require('@realitio/realitio-contracts/truffle/build/contracts/Realitio.TRST.json')
-}
-
-const arb_json_by_curr = {
-    'ETH': require('@realitio/realitio-contracts/truffle/build/contracts/Arbitrator.json'),
-   // 'DAI': require('@realitio/realitio-contracts/truffle/build/contracts/Arbitrator.DAI.json'),
-    'TRST': require('@realitio/realitio-contracts/truffle/build/contracts/Arbitrator.TRST.json')
-}
-
-const token_json_by_curr = {
-    'ETH': null,
-   // 'DAI': require('@realitio/realitio-contracts/truffle/build/contracts/ERC20.DAI.json'),
-    'TRST': require('@realitio/realitio-contracts/truffle/build/contracts/ERC20.TRST.json'),
-}
-
-const token_info = {
-    'ETH': {
-        'decimals': 1000000000000000000,
-        'small_number': 0.01 * 1000000000000000000
-    },
-    'DAI': {
-        'decimals': 1000000000000000000,
-        'small_number': 1 * 1000000000000000000
-    },
-    'TRST': {
-        'decimals': 1000000,
-        'small_number': 100 * 1000000
-    }
-}
-
-// From https://chainid.network/chains.json
-const full_chain_list = require('../chains.json');
+let token_info = {};
+let chain_info = {};
 
 // The library is Web3, metamask's instance will be web3, we instantiate our own as web3js
 const Web3 = require('web3');
@@ -50,21 +18,16 @@ var arb_json;
 var token_json;
 
 var erc20_token;
+var is_currency_native = false;
 
 // For now we have a json file hard-coding the TOS of known arbitrators.
 // See https://github.com/realitio/realitio-dapp/issues/136 for the proper way to do it.
 const arb_tos = require('./arbitrator_tos.json');
 
-const arbitrator_list_by_curr = {
-    'ETH': require('@realitio/realitio-contracts/config/arbitrators.json'),
-    // 'DAI': require('@realitio/realitio-contracts/config/arbitrators.DAI.json'),
-    'TRST': require('@realitio/realitio-contracts/config/arbitrators.TRST.json')
-}
 var arbitrator_list;
-
 var foreign_proxy_data;
 
-const TEMPLATE_CONFIG = require('@realitio/realitio-contracts/config/templates.json');
+const TEMPLATE_CONFIG = rc_contracts.templateConfig();
 
 const contract = require("truffle-contract");
 const BigNumber = require('bignumber.js');
@@ -94,47 +57,12 @@ var is_initial_load_done = false;
 const QUESTION_TYPE_TEMPLATES = TEMPLATE_CONFIG.base_ids;
 var USE_COMMIT_REVEAL = false;
 
-const BLOCK_EXPLORERS = {
-    1: 'https://etherscan.io',
-    3: 'https://ropsten.etherscan.io',
-    4: 'https://rinkeby.etherscan.io',
-    42: 'https://kovan.etherscan.io',
-    77: 'https://blockscout.com/poa/xdai/',
-    100: 'https://blockscout.com/poa/xdai/',
-    1337: 'https://etherscan.io'
-};
+var HOSTED_RPC_NODE;
 
-const RPC_NODES = {
-    1: 'https://mainnet.socialminds.jp', // 'https://mainnet.infura.io/tSrhlXUe1sNEO5ZWhpUK',
-    3: 'https://ropsten.infura.io/tSrhlXUe1sNEO5ZWhpUK',
-    4: 'https://rinkeby.socialminds.jp', // 'https://rinkeby.infura.io/tSrhlXUe1sNEO5ZWhpUK',
-    42: 'https://kovan.socialminds.jp',
-    77: 'https://sokol.poa.network',
-    100: 'https://xdai.poanetwork.dev',
-    1337: 'https://localhost:8545'
-};
-
-// The point where we deployed the contract on the network
-// No point in looking for questions any further back than that
-const START_BLOCKS = {
-    1: 6531147,
-    4: 3175028, // for quicker loading start more like 4800000,
-    42: 10350865,
-    77: 17307140,
-    100: 11938534
-}
 var START_BLOCK;
 
-// If we know that the first post for a category was at block X, we can skip loading before that
-// NB We may lose some user history related to questions from other categories
-const CATEGORY_STARTS = {
-    1: {
-        "devcon-quiz": 8667490
-    }
-}
-
 var network_id = null;
-var block_explorer = null;
+var BLOCK_EXPLORER = null;
 
 const FETCH_NUMBERS = [100, 2500, 5000];
 
@@ -779,7 +707,7 @@ $(document).on('click', '#post-a-question-window .post-question-submit', functio
                             win = populateQuestionWindow(win, q, false);
 
                             // TODO: Once we have code to know which network we're on, link to a block explorer
-                            win.find('.pending-question-txid a').attr('href', block_explorer + '/tx/' + txid);
+                            win.find('.pending-question-txid a').attr('href', BLOCK_EXPLORER + '/tx/' + txid);
                             win.find('.pending-question-txid a').text(txid.substr(0, 12) + "...");
                             win.addClass('unconfirmed-transaction').addClass('has-warnings');
                             win.attr('data-pending-txid', txid);
@@ -850,7 +778,7 @@ function isArbitratorValid(arb) {
 // This is used for fast rendering of the warnings on the list page.
 // TODO: We should really go back through them later and set warnings on anything that turned out to be bad
 function isArbitratorValidFast(test_arb) {
-    for (var a in arbitrator_list[""+network_id]) {
+    for (var a in arbitrator_list) {
         if (a.toLowerCase() == test_arb.toLowerCase()) {
             return true;
         }
@@ -859,9 +787,9 @@ function isArbitratorValidFast(test_arb) {
 }
 
 function arbitratorAddressToText(addr) {
-    for (var a in arbitrator_list[""+network_id]) {
+    for (var a in arbitrator_list) {
         if (a.toLowerCase() == addr.toLowerCase()) {
-            return arbitrator_list[network_id][a];
+            return arbitrator_list[a];
         }
     }
     return addr;
@@ -1222,7 +1150,7 @@ function updateClaimableDisplay() {
         var txids = claiming.txids;
         $('.answer-claiming-container').find('.claimable-eth').text(decimalizedBigNumberToHuman(claiming.total));
         var txid = txids.join(', '); // TODO: Handle multiple links properly
-        $('.answer-claiming-container').find('a.txid').attr('href', block_explorer + '/tx/' + txid);
+        $('.answer-claiming-container').find('a.txid').attr('href', BLOCK_EXPLORER + '/tx/' + txid);
         $('.answer-claiming-container').find('a.txid').text(txid.substr(0, 12) + "...");
         $('.answer-claiming-container').show();
     } else {
@@ -1756,7 +1684,7 @@ function updateUserBalanceDisplay() {
     if (!account) {
         return;
     }
-    if (currency == 'ETH') {
+    if (is_currency_native) {
         // console.log('updating balacne for', account);
         web3js.eth.getBalance(account, function(error, result) {
             // console.log('got updated balacne for', account, result.toNumber());
@@ -1782,9 +1710,9 @@ function updateUserBalanceDisplay() {
 function getERC20TokenInstance() {
         return new Promise((resolve, reject)=>{
             var ERC20 = contract(token_json);
-            //ERC20.setProvider(new Web3.providers.HttpProvider(RPC_NODES[network_id]));
+            //ERC20.setProvider(new Web3.providers.HttpProvider(HOSTED_RPC_NODE));
             ERC20.setProvider(web3js.currentProvider);
-            //console.log('using network', RPC_NODES[network_id]);
+            //console.log('using network', HOSTED_RPC_NODE);
             ERC20.deployed().then(function(instance) {
                 resolve(instance);
             });
@@ -2550,7 +2478,7 @@ console.log(ans);
         var unconfirmed_answer = question_detail['history_unconfirmed'][question_detail['history_unconfirmed'].length - 1].args;
 
         var txid = question_detail['history_unconfirmed'][question_detail['history_unconfirmed'].length - 1].txid;
-        unconfirmed_container.find('.pending-answer-txid a').attr('href', block_explorer + '/tx/' + txid);
+        unconfirmed_container.find('.pending-answer-txid a').attr('href', BLOCK_EXPLORER + '/tx/' + txid);
         unconfirmed_container.find('.pending-answer-txid a').text(txid.substr(0, 12) + "...");
         unconfirmed_container.attr('data-pending-txid', txid);
 
@@ -4078,8 +4006,8 @@ function pageInit(account) {
     */
 
     var RealityCheckRealitio = contract(rc_json);
-    RealityCheckRealitio.setProvider(new Web3.providers.HttpProvider(RPC_NODES[network_id]));
-    console.log('using network', RPC_NODES[network_id]);
+    RealityCheckRealitio.setProvider(new Web3.providers.HttpProvider(HOSTED_RPC_NODE));
+    console.log('using network', HOSTED_RPC_NODE);
     RealityCheckRealitio.deployed().then(function(instance) {
         rcrealitio = instance;
 
@@ -4503,17 +4431,6 @@ function initNetwork(net_id) {
         return false;
     }
     $('.network-status'+net_cls).show();
-    if (BLOCK_EXPLORERS[net_id]) {
-        block_explorer = BLOCK_EXPLORERS[net_id];
-    } else {
-        // If you've got some unknown test network then we'll just link to main net
-        block_explorer = BLOCK_EXPLORERS[1];
-    }
-    if (START_BLOCKS[net_id]) {
-        START_BLOCK = START_BLOCKS[net_id];
-    } else {
-        START_BLOCK = 1;
-    }
     return true;
 }
 
@@ -4543,7 +4460,7 @@ function getAccount(fail_soft) {
                     if (acc && acc.length > 0) {
                         //console.log('accounts', acc);
                         account = acc[0];
-                        $('.account-balance-link').attr('href', block_explorer + '/address/' + account);
+                        $('.account-balance-link').attr('href', BLOCK_EXPLORER + '/address/' + account);
                     } else {
                         if (!is_web3_fallback) {
                             console.log('no accounts');
@@ -4584,12 +4501,22 @@ function accountInit(account) {
 }
 
 function initCurrency(curr) {
-    arb_json = arb_json_by_curr[currency];
-    arbitrator_list = arbitrator_list_by_curr[currency];
-    token_json = token_json_by_curr[currency];
-    // NB For XDAI we consider it ETH underneath and just change the text, which we don't know until network load
     $('.token-ticker-text').text(currency);
-    $('select#token-selection').val(curr);
+    for(t in token_info) {
+        let op = $('<option>');
+        op.attr('value', t).text(t);
+        if (t == curr) {
+                if (token_info[t].is_native) {
+        console.log('is_native');
+                        is_currency_native = true;
+        } else {
+        console.log('not native');
+        }
+            op.prop('selected', 'selected');
+        }
+        $('select#token-selection').append(op);
+    }
+    //$('select#token-selection').val(curr);
 }
 
 function displayForeignProxy(datastr) {
@@ -4676,29 +4603,7 @@ function displayWrongNetwork(specified, detected) {
     }
     console.log(specified_network_txt, detected_network_txt);
 
-    var chainparams;
-    for (var ci = 0; ci< full_chain_list.length; ci++) {
-        var chain_info = full_chain_list[ci];
-        if (chain_info.chainId == specified) {
-            if ('disableSwitch' in chain_info) {
-                break;
-            }
-            chainparams = {};
-            chainparams['chainId'] = "0x"+Number(specified).toString(16),
-            chainparams['chainName'] = chain_info.name;
-            chainparams['rpcUrls'] =  chain_info.rpc;
-            chainparams['nativeCurrency'] = chain_info.nativeCurrency;
-            // We add these two ourselves, they may not be there
-            if ('iconUrls' in chain_info) {
-                chainparams['iconUrls'] = chain_info['iconUrls'];
-            }
-            if ('blockExplorerUrls' in chain_info) {
-                chainparams['blockExplorerUrls'] = chain_info['blockExplorerUrls'];
-            }
-        }
-    }
-
-    if (chainparams) {
+    if (chain_info) {
         var lnk = $('<a>');
         lnk.text($('.add-network-button').text());
         lnk.bind('click', function(evt) {
@@ -4708,7 +4613,7 @@ function displayWrongNetwork(specified, detected) {
             ethereum
             .request({
                 method: 'wallet_addEthereumChain',
-                params: [chainparams]
+                params: [chain_info]
             })
             .then((result) => {
                 console.log('result was', result);
@@ -4734,20 +4639,13 @@ window.addEventListener('load', function() {
     if (args['token'] && args['token'] != 'ETH') {
         currency = args['token'];
     }
-    rc_json = rc_json_by_curr[currency];
-    if (!rc_json) {
-        console.log('Token not recognized', currency);
-        return;
-    }
-
-    initCurrency(currency);
     
     var is_web3_fallback = false;
 
     if (typeof web3 === 'undefined') {
         var is_web3_fallback = true;
         // fallback - use your fallback strategy (local node / hosted node + in-dapp id mgmt / fail)
-        web3js = new Web3(new Web3.providers.HttpProvider(RPC_NODES["1"]));
+        web3js = new Web3(new Web3.providers.HttpProvider(HOSTED_RPC_NODE));
         console.log('no web3js, using infura on network', "1");
     } else {
         // Use Mist/MetaMask's provider
@@ -4777,6 +4675,37 @@ window.addEventListener('load', function() {
 
     web3js.version.getNetwork((err, net_id) => {
         if (err === null) {
+
+            const rc_config = rc_contracts.realityETHConfig(net_id, currency);
+            if (!rc_config) {
+                $('body').addClass('error-invalid-network-for-token').addClass('error');
+                return;
+            }
+
+            START_BLOCK = rc_config.block;
+
+            arbitrator_list = rc_config.arbitrators;
+
+            token_info = rc_contracts.networkTokenInfo(net_id);
+            console.log('got token info', token_info);
+
+            rc_json = rc_contracts.realityETHInstance(rc_config);
+            arb_json = rc_contracts.arbitratorInstance();
+
+            if (!rc_json) {
+                console.log('Token not recognized', currency);
+                return;
+            }
+
+            initCurrency(currency);
+            if (!is_currency_native) {
+                token_json = rc_contracts.erc20Instance(rc_config);
+            }
+
+            chain_info = rc_contracts.networkData(net_id);
+            HOSTED_RPC_NODE = chain_info['hostedRPC'];
+            BLOCK_EXPLORER = chain_info['blockExplorerUrls'][0];
+
             if (!initNetwork(net_id)) {
                 $('body').addClass('error-invalid-network').addClass('error');
                 return;
@@ -4787,51 +4716,45 @@ window.addEventListener('load', function() {
                 return;
             }
 
-            // Special case for XDAI, which looks like ETH underneath
-            if (net_id == "100" || net_id == "77") {
-                $('.token-ticker-text').text('XDAI');
-            } else {
-                if (!$('body').hasClass('foreign-proxy')) {
-                    $('select#token-selection').removeClass('uninitialized');
-                }
+            if (!$('body').hasClass('foreign-proxy')) {
+                $('select#token-selection').removeClass('uninitialized');
             }
-            populateArbitratorSelect(arbitrator_list[net_id]);
+            populateArbitratorSelect(arbitrator_list);
             foreignProxyInitNetwork(net_id);
-        }
 
-        USE_COMMIT_REVEAL = (parseInt(args['commit']) == 1);
-        if (args['category']) {
-            category = args['category'];
-            $('body').addClass('category-' + category);
-            var cat_txt = $("#filter-list").find("[data-category='" + category + "']").text();
-            $('#filterby').text(cat_txt);
-            if (CATEGORY_STARTS[net_id] && CATEGORY_STARTS[net_id][category] && CATEGORY_STARTS[net_id][category] > START_BLOCK) {
-                START_BLOCK = CATEGORY_STARTS[net_id][category];
-            }
-        }
-        //console.log('args:', args);
-        web3js.eth.getBlock('latest', function(err, result) {
-            if (result.number > current_block_number) {
-                current_block_number = result.number;
+            USE_COMMIT_REVEAL = (parseInt(args['commit']) == 1);
+
+            if (args['category']) {
+                category = args['category'];
+                $('body').addClass('category-' + category);
+                var cat_txt = $("#filter-list").find("[data-category='" + category + "']").text();
+                $('#filterby').text(cat_txt);
             }
 
-            RealityCheck = contract(rc_json);
-            RealityCheck.setProvider(web3js.currentProvider);
-            RealityCheck.deployed().then(function(instance) {
-                rc = instance;
-                pageInit();
-                if (args['question']) {
-                    //console.log('fetching question');
-                    ensureQuestionDetailFetched(args['question']).then(function(question) {
-                        openQuestionWindow(question[Qi_question_id]);
-
-                    })
+            //console.log('args:', args);
+            web3js.eth.getBlock('latest', function(err, result) {
+                if (result.number > current_block_number) {
+                    current_block_number = result.number;
                 }
 
-                // NB If this fails we'll try again when we need to do something using the account
-                getAccount(true);
+                RealityCheck = contract(rc_json);
+                RealityCheck.setProvider(web3js.currentProvider);
+                RealityCheck.deployed().then(function(instance) {
+                    rc = instance;
+                    pageInit();
+                    if (args['question']) {
+                        //console.log('fetching question');
+                        ensureQuestionDetailFetched(args['question']).then(function(question) {
+                            openQuestionWindow(question[Qi_question_id]);
+
+                        })
+                    }
+
+                    // NB If this fails we'll try again when we need to do something using the account
+                    getAccount(true);
+                });
             });
-        });
+        }
 
     });
 

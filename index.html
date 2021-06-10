@@ -30,7 +30,8 @@
                 <a class="continue-read-only-message" href="#">Not now, I'm just looking...</a>
             </div>
             <span class="error-label no-metamask-accounts">No accounts found. Please make sure MetaMask is unlocked then refresh the page.</span>
-            <span class="error-label invalid-network">Invalid network. Please use the main Ethereum network.</span>
+            <span class="error-label invalid-network">Invalid network. Please use the main Ethereum network or another supported network.</span>
+            <span class="error-label invalid-network-for-token">Reality.eth is does not support this token on the current network.</span>
             <span class="error-label not-specified-network">You followed a link to the <span class="network-specified-text"></span> but you are currently on <span class="network-detected-text"></span>. 
                 <br />
                 <br />
@@ -62,8 +63,10 @@
                     <span class="network-status network-id-1">Main Ethereum Network</span>
                     <span class="network-status network-id-4">Rinkeby Test Network</span>
                     <span class="network-status network-id-42">Kovan Test Network</span>
+                    <span class="network-status network-id-56">Binance Smart Chain</span>
                     <span class="network-status network-id-77">Sokal Network</span>
                     <span class="network-status network-id-100">XDAI Network</span>
+                    <span class="network-status network-id-137">Polygon Main Network (Matic)</span>
                     <span class="network-status network-id-123411710">Local Test Network</span>
                     <span class="network-status network-id-unknown">Unknown Test Network</span>
                 </div>
@@ -73,8 +76,6 @@
                 <a id="post-a-question-button" class="rcbrowser__open-button" data-target-id="id0" href="">Ask a Question</a>
             </div>
             <select id="token-selection" name="token-selection" class="uninitialized">
-                <option value="ETH">ETH</option>
-                <option value="TRST">TRST</option>
             </select>
         </header>
         <div id="questions-container" class="panel">

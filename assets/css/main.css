@@ -3140,6 +3140,12 @@ span.error-label.invalid-network {
 body.error-invalid-network div.error-bar span.error-label.invalid-network {
   display: inline !important; }
 
+span.error-label.invalid-network-for-token {
+  display: none; }
+
+body.error-invalid-network-for-token div.error-bar span.error-label.invalid-network-for-token {
+  display: inline !important; }
+
 span.error-label.not-specified-network {
   display: none; }
 
