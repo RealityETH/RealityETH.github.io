@@ -35,8 +35,6 @@ const timeago = require('timeago.js');
 const timeAgo = new timeago();
 const jazzicon = require('jazzicon');
 
-const LEGACY_CONTRACT_ADDRESSES = require('../../v1/addresses.json');
-
 // Special ABI for Kleros
 const ProxiedArbABI = require('../../abi/ProxiedArbitrator.json');
 
@@ -69,7 +67,7 @@ const FETCH_NUMBERS = [100, 2500, 5000];
 var last_displayed_block_number = 0;
 var current_block_number = 1;
 
-var currency = 'ETH';
+var currency;
 
 // Struct array offsets
 // Assumes we unshift the ID onto the start
@@ -737,7 +735,7 @@ $(document).on('click', '#post-a-question-window .post-question-submit', functio
 
                     }
 
-                    if (currency == 'ETH') { 
+                    if (is_currency_native) { 
                         rc.askQuestion.sendTransaction(template_id, qtext, arbitrator, timeout_val, opening_ts, 0, {
                                 from: account,
                                 gas: 200000,
@@ -3523,7 +3521,7 @@ $(document).on('click', '.post-answer-button', function(e) {
 
                 // TODO: We wait for the txid here, as this is not expected to be the main UI pathway.
                 // If USE_COMMIT_REVEAL becomes common, we should add a listener and do everything asychronously....
-                if (currency == 'ETH') {
+                if (is_currency_native) {
                     return rc.submitAnswerCommitment(question_id, answer_hash, current_question[Qi_bond], account, {from:account, gas:200000, value:bond}).then( function(txid) {
                         console.log('got submitAnswerCommitment txid', txid);
                         rc.submitAnswerReveal.sendTransaction(question_id, answer_plaintext, nonce, bond, {from:account, gas:200000})
@@ -3539,7 +3537,7 @@ $(document).on('click', '.post-answer-button', function(e) {
                     });
                 }
             } else {
-                if (currency == 'ETH') {
+                if (is_currency_native) {
                     rc.submitAnswer.sendTransaction(question_id, new_answer, current_question[Qi_bond], {
                         from: account,
                         gas: 200000,
@@ -3630,7 +3628,7 @@ $(document).on('click', '.rcbrowser-submit.rcbrowser-submit--add-reward', functi
         $(this).parent('div').prev('div.input-container').addClass('is-error');
     } else {
         getAccount().then(function() {
-            if (currency == 'ETH') {
+            if (is_currency_native) {
                 rc.fundAnswerBounty(question_id, {
                     from: account,
                     value: reward
@@ -4431,6 +4429,13 @@ function initNetwork(net_id) {
         return false;
     }
     $('.network-status'+net_cls).show();
+
+    if (typeof ethereum !== 'undefined') {
+        ethereum.on('chainChanged', () => {
+          document.location.reload()
+        })
+    }
+
     return true;
 }
 
@@ -4467,19 +4472,6 @@ function getAccount(fail_soft) {
                             $('body').addClass('error-no-metamask-accounts').addClass('error');
                         }
                     }
-
-                if (LEGACY_CONTRACT_ADDRESSES[acc[0].toLowerCase()]) {
-                    // Notification bar(footer)
-                    if (window.localStorage.getItem('v1-got-it') == null) {
-                        $('#footer-notification-bar').css('display', 'block');
-                    }
-                    $('#got-it-button').on('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        window.localStorage.setItem('v1-got-it', true);
-                        $('#footer-notification-bar').css('display', 'none');
-                    });
-                }
 
                 accountInit(account);
                 resolve(account);
@@ -4603,6 +4595,7 @@ function displayWrongNetwork(specified, detected) {
     }
     console.log(specified_network_txt, detected_network_txt);
 
+    const chain_info = rc_contracts.walletAddParameters(specified);
     if (chain_info) {
         var lnk = $('<a>');
         lnk.text($('.add-network-button').text());
@@ -4675,6 +4668,11 @@ window.addEventListener('load', function() {
 
     web3js.version.getNetwork((err, net_id) => {
         if (err === null) {
+
+            if (!currency) {
+                currency = rc_contracts.defaultTokenForNetwork(net_id);
+console.log('picked token', currency);
+            }
 
             const rc_config = rc_contracts.realityETHConfig(net_id, currency);
             if (!rc_config) {
