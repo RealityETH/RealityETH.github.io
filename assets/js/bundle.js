@@ -1827,6 +1827,151 @@ module.exports=[
             }
         ],
         "anonymous": false
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "question_id",
+                "type": "bytes32"
+            },
+            {
+                "name": "tokens",
+                "type": "uint256"
+            }
+        ],
+        "name": "fundAnswerBountyERC20",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "_token",
+                "type": "address"
+            }
+        ],
+        "name": "setToken",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "question_id",
+                "type": "bytes32"
+            },
+            {
+                "name": "answer",
+                "type": "bytes32"
+            },
+            {
+                "name": "max_previous",
+                "type": "uint256"
+            },
+            {
+                "name": "tokens",
+                "type": "uint256"
+            }
+        ],
+        "name": "submitAnswerERC20",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "question_id",
+                "type": "bytes32"
+            },
+            {
+                "name": "answer_hash",
+                "type": "bytes32"
+            },
+            {
+                "name": "max_previous",
+                "type": "uint256"
+            },
+            {
+                "name": "_answerer",
+                "type": "address"
+            },
+            {
+                "name": "tokens",
+                "type": "uint256"
+            }
+        ],
+        "name": "submitAnswerCommitmentERC20",
+        "outputs": [],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": false,
+        "inputs": [
+            {
+                "name": "template_id",
+                "type": "uint256"
+            },
+            {
+                "name": "question",
+                "type": "string"
+            },
+            {
+                "name": "arbitrator",
+                "type": "address"
+            },
+            {
+                "name": "timeout",
+                "type": "uint32"
+            },
+            {
+                "name": "opening_ts",
+                "type": "uint32"
+            },
+            {
+                "name": "nonce",
+                "type": "uint256"
+            },
+            {
+                "name": "tokens",
+                "type": "uint256"
+            }
+        ],
+        "name": "askQuestionERC20",
+        "outputs": [
+            {
+                "name": "",
+                "type": "bytes32"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "token",
+        "outputs": [
+            {
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
     }
 ]
 },{}],4:[function(require,module,exports){
@@ -2028,18 +2173,11 @@ module.exports={
         },
         "TRST": {
             "Arbitrator": {
-                "address": "0x9563C508DeC0bEC244E763e88dd0Ae300D036e5A",
-                "block": 8692055,
-                "token_address": null,
-                "notes": null
+                "address": "0xa682C58333F4959cbF728c2a871548E3D8978Fa2",
+                "block": 8743912,
+                "reality_eth_address": "0xa4dA771Bbd6e93bB8e714Fe97b388fe88eec8288"
             },
             "RealityETH_ERC20-2.0": {
-                "address": "0xa4dA771Bbd6e93bB8e714Fe97b388fe88eec8288",
-                "block": 4643634,
-                "token_address": "0x21036c54e16521b8809553956123e44054120226",
-                "notes": null
-            },
-            "RealityETH-2.0_ERC20": {
                 "address": "0xa4dA771Bbd6e93bB8e714Fe97b388fe88eec8288",
                 "block": 4643634,
                 "token_address": "0x21036C54e16521B8809553956123E44054120226",
@@ -2064,38 +2202,37 @@ module.exports={
             }
         },
         "POLK": {
+            "Arbitrator": {
+                "address": "0x9046D057D7957A2A93d55C711EBC5B62d812a5b8",
+                "block": 25399305,
+                "reality_eth_address": "0x1346800BC8915536B9eaa388fa9A6B93398E5999"
+            },
             "RealityETH_ERC20-2.0": {
                 "address": "0x1346800BC8915536B9eaa388fa9A6B93398E5999",
                 "block": 25355307,
                 "token_address": "0x222E11E134F9AB3750812b37F0DA51B4467EaA7a",
-                "notes": null
-            }
-        },
-        "TRST": {
-            "RealityETH_ERC20-2.0": {
-                "version": "2.0-erc20",
-                "address": "0x3D3B51b1091d1F6491AeB1916C94BAfe57f6Cc9d",
-                "block": 8050824,
-                "commit": "https://github.com/realitio/realitio-contracts/tree/16dd24c5ccb676b7c099852ea13b18b8298387a5",
-                "solc": "v0.4.25+commit.59dbf8f1",
-                "interface": "IRealityETH-v2.1.sol",
-                "abi": "QmdTEgjf8E8QsNaNueijLeVcKCUzf6W9R6tGiceRMxNJxC",
-                "optimization": 200,
-                "audit": "TODO",
                 "notes": null,
-                "token_address": "0xcb94be6f13a1182e4a4b6140cb7bf2025d28e41b",
-                "flat": "Realitio_ERC20_QmTrJ4ZEJobV6SAcShmeNAGcDtEsUgUbcJG1moyJWTTg42",
-                "bin": ""
+                "arbitrators": {
+                    "0x9046D057D7957A2A93d55C711EBC5B62d812a5b8": "Test POLK arbitrator (reality.eth)"
+                }
             }
         }
     },
     "56": {
         "BNB": {
+            "Arbitrator": {
+                "address": "0xec634BD4c5766e96dbDC3cf89D15B4D340690118",
+                "block": 8215956,
+                "reality_eth_address": "0xa75ae6d61dd9d55e8153a393e2fc859c6a0fc716"
+            },
             "RealityETH-2.1": {
                 "address": "0xa75ae6d61dd9d55e8153a393e2fc859c6a0fc716",
                 "block": 7962044,
                 "token_address": null,
-                "notes": null
+                "notes": null,
+                "arbitrators": {
+                    "0xec634BD4c5766e96dbDC3cf89D15B4D340690118": "Reality.eth team (for testing only)"
+                }
             }
         }
     },
@@ -2130,40 +2267,46 @@ module.exports={
 }
 },{}],7:[function(require,module,exports){
 module.exports={
-    "ETH": {
-        "decimals": 1000000000000000000,
-        "small_number": 10000000000000000,
-        "native_networks": {
-            "1": true,  
-            "4": true,
-            "42": true
-        }
-    },
-    "DAI": {
-        "decimals": 1000000000000000000,
-        "small_number": 1000000000000000000,
-        "native_networks": {
-            "100": true,
-            "77": true
-        }
-    },
-    "TRST": {
-        "decimals": 1000000,
-        "small_number": 100000000
-    },
-    "POLK": {
-        "decimals": 1000000000000000000,
-        "small_number": 1000000000000000000
-    },
     "BNB": {
         "decimals": 1000000000000000000,
         "small_number": 10000000000000000,
         "native_networks": {
-            "56": true            
+            "56": true
+        }
+    },
+    "ETH": {
+        "decimals": 1000000000000000000,
+        "small_number": 10000000000000000,
+        "native_networks": {
+            "1": true,
+            "4": true,
+            "42": true
+        }
+    },
+    "POLK": {
+        "decimals": 1000000000000000000,
+        "small_number": 1000000000000000000,
+        "erc20_networks": {
+            "42": "0x222E11E134F9AB3750812b37F0DA51B4467EaA7a"
+        }
+    },
+    "TRST": {
+        "decimals": 1000000,
+        "small_number": 100000000,
+        "erc20_networks": {
+            "1": "0xcb94be6f13a1182e4a4b6140cb7bf2025d28e41b",
+            "4": "0x21036C54e16521B8809553956123E44054120226"
+        }
+    },
+    "XDAI": {
+        "decimals": 1000000000000000000,
+        "small_number": 1000000000000000000,
+        "native_networks": {
+            "77": true,
+            "100": true
         }
     }
 }
-
 },{}],8:[function(require,module,exports){
 const fs = require('fs');
 const all_config = require('./generated/contracts.json');
@@ -2213,7 +2356,7 @@ function erc20Instance(config) {
     };
 }
 
-function networkTokenInfo(network_id) {
+function networkTokenList(network_id) {
     let ret = {};
     for (t in token_info) {
         if (all_config[""+network_id][t]) {
@@ -2224,9 +2367,28 @@ function networkTokenInfo(network_id) {
     return ret;
 }
 
+function tokenConfig(token, network_id) {
+    const t = token_info[token];
+    if (!t) {
+        console.log('token not found in token_info');
+        return null;
+    }
+    if (t.native_networks && t.native_networks[network_id+""]) {
+        t.is_native = true;
+        return t;
+    }
+    if (t.erc20_networks && t.erc20_networks[network_id+""]) {
+        t.address = t.erc20_networks[network_id+""];
+        t.is_native = false;
+        return t;
+    }
+    console.log("Token config not found for network");
+    return null;
+}
+
 function realityETHConfig(network_id, token, version) {
     const versions = ['2.1', '2.1-rc1', '2.0'];
-    const token_info = networkTokenInfo(network_id);
+    const token_info = networkTokenList(network_id);
     if (!token_info[token]) {
         console.log("Token not found for network");
         return null;
@@ -2287,11 +2449,9 @@ function defaultTokenForNetwork(network_id) {
     // Use the native token if we have one
     // If not, use the first one
     const config = all_config[""+network_id];
-console.log('config', config);
     var ret = null;
     for (var token in config) {
-console.log('token', token);
-        var token_info = networkTokenInfo(network_id);
+        var token_info = networkTokenList(network_id);
         if (!token_info) {
             continue;
         }
@@ -2309,7 +2469,8 @@ module.exports.realityETHConfig = realityETHConfig;
 module.exports.realityETHInstance = realityETHInstance;
 module.exports.arbitratorInstance = arbitratorInstance;
 module.exports.erc20Instance = erc20Instance;
-module.exports.networkTokenInfo = networkTokenInfo;
+module.exports.networkTokenList = networkTokenList;
+module.exports.tokenConfig = tokenConfig
 module.exports.networkData = networkData;
 module.exports.walletAddParameters = walletAddParameters;
 module.exports.templateConfig = templateConfig;
@@ -7464,7 +7625,7 @@ window.addEventListener('load', function () {
 
             arbitrator_list = rc_config.arbitrators;
 
-            token_info = rc_contracts.networkTokenInfo(net_id);
+            token_info = rc_contracts.networkTokenList(net_id);
             console.log('got token info', token_info);
 
             rc_json = rc_contracts.realityETHInstance(rc_config);
