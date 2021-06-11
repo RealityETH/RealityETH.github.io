@@ -1,58 +1,55 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Using Reality.eth from a contract &mdash; reality.eth  documentation</title>
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
   
+  
+
   
   
 
   
 
   
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="reality.eth  documentation" href="index.html"/>
-        <link rel="next" title="Unavailability and null responses" href="availability.html"/>
-        <link rel="prev" title="Using the Reality.eth dapp" href="dapp.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Unavailability and null responses" href="availability.html" />
+    <link rel="prev" title="Using the Reality.eth dapp" href="dapp.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -79,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -125,13 +123,14 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">reality.eth</a>
@@ -139,10 +138,13 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
 
 
 
@@ -162,14 +164,14 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Using Reality.eth from a contract</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/contracts.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -191,105 +193,104 @@
 <p>Hovering your mouse over the “…” mark in the upper right-hand corner of a question will show you the question ID and the hash of the question content.</p>
 <div class="section" id="fetching-the-answer-to-a-particular-question">
 <h3>Fetching the answer to a particular question<a class="headerlink" href="#fetching-the-answer-to-a-particular-question" title="Permalink to this headline">¶</a></h3>
-<p>Each question can be referred to by its <code class="docutils literal"><span class="pre">question_id</span></code>, which is a <code class="docutils literal"><span class="pre">bytes32</span></code>.</p>
-<p>There is only one question with any given <code class="docutils literal"><span class="pre">question_id</span></code>, and there can only be one corresponding answer.</p>
+<p>Each question can be referred to by its <code class="docutils literal notranslate"><span class="pre">question_id</span></code>, which is a <code class="docutils literal notranslate"><span class="pre">bytes32</span></code>.</p>
+<p>There is only one question with any given <code class="docutils literal notranslate"><span class="pre">question_id</span></code>, and there can only be one corresponding answer.</p>
 <p>You can fetch the final answer for a question by calling</p>
-<div class="highlight-javascript"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nx">bytes32</span> <span class="nx">response</span> <span class="o">=</span> <span class="nx">resultFor</span><span class="p">(</span><span class="nx">bytes32</span> <span class="nx">question_id</span><span class="p">);</span>
+<div class="highlight-javascript notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nx">bytes32</span> <span class="nx">response</span> <span class="o">=</span> <span class="nx">resultFor</span><span class="p">(</span><span class="nx">bytes32</span> <span class="nx">question_id</span><span class="p">);</span>
 </pre></div>
 </td></tr></table></div>
-<p>This will return <code class="docutils literal"><span class="pre">bytes32</span></code> data, or throw an error (<code class="docutils literal"><span class="pre">revert</span></code>) if the question does not exist or has not been finalized. You often want to cast the resulting <code class="docutils literal"><span class="pre">bytes32</span></code> to a <code class="docutils literal"><span class="pre">uint256</span></code> when you process it. By convention all supported types use <code class="docutils literal"><span class="pre">0xff...ff</span></code> to mean “invalid”. This will depend on the Question Type (see below).</p>
+<p>This will return <code class="docutils literal notranslate"><span class="pre">bytes32</span></code> data, or throw an error (<code class="docutils literal notranslate"><span class="pre">revert</span></code>) if the question does not exist or has not been finalized. You often want to cast the resulting <code class="docutils literal notranslate"><span class="pre">bytes32</span></code> to a <code class="docutils literal notranslate"><span class="pre">uint256</span></code> when you process it. By convention all supported types use <code class="docutils literal notranslate"><span class="pre">0xff...ff</span></code> to mean “invalid”. This will depend on the Question Type (see below).</p>
 </div>
 <div class="section" id="interpreting-the-result-of-a-question">
 <h3>Interpreting the result of a question<a class="headerlink" href="#interpreting-the-result-of-a-question" title="Permalink to this headline">¶</a></h3>
-<p>Questions have a <code class="docutils literal"><span class="pre">type</span></code>, which decides what format the answer should take, and tells the Reality.eth dapp what kind of UI it should display to submit answers. The dapp recognizes the following types:</p>
+<p>Questions have a <code class="docutils literal notranslate"><span class="pre">type</span></code>, which decides what format the answer should take, and tells the Reality.eth dapp what kind of UI it should display to submit answers. The dapp recognizes the following types:</p>
 <div class="section" id="bool">
 <h4>bool<a class="headerlink" href="#bool" title="Permalink to this headline">¶</a></h4>
-<p>A <code class="docutils literal"><span class="pre">bool</span></code> type represents a yes/no question. The result will be <code class="docutils literal"><span class="pre">1</span></code>, <code class="docutils literal"><span class="pre">0</span></code>, or <code class="docutils literal"><span class="pre">0xff...ff</span></code> for invalid, for example:</p>
-<dl class="docutils">
-<dt>Did Donald Trump win the 2016 US presidential election?</dt>
-<dd><ul class="first last simple">
-<li>1: Yes</li>
-<li>0: No</li>
-<li>0xff..ff: Invalid</li>
+<p>A <code class="docutils literal notranslate"><span class="pre">bool</span></code> type represents a yes/no question. The result will be <code class="docutils literal notranslate"><span class="pre">1</span></code>, <code class="docutils literal notranslate"><span class="pre">0</span></code>, or <code class="docutils literal notranslate"><span class="pre">0xff...ff</span></code> for invalid, for example:</p>
+<dl class="simple">
+<dt>Did Donald Trump win the 2016 US presidential election?</dt><dd><ul class="simple">
+<li><p>1: Yes</p></li>
+<li><p>0: No</p></li>
+<li><p>0xff..ff: Invalid</p></li>
 </ul>
 </dd>
 </dl>
 </div>
 <div class="section" id="uint">
 <h4>uint<a class="headerlink" href="#uint" title="Permalink to this headline">¶</a></h4>
-<p>A <code class="docutils literal"><span class="pre">uint</span></code> type represents a number. The question may have a <code class="docutils literal"><span class="pre">decimals</span></code> field by which it should be divided. Negative numbers are not currently supported.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">uint</span></code> type represents a number. The question may have a <code class="docutils literal notranslate"><span class="pre">decimals</span></code> field by which it should be divided. Negative numbers are not currently supported.</p>
 <p>How many electoral votes did Hillary Clinton win in the 2016 US presidential election?</p>
 </div>
 <div class="section" id="single-select">
 <h4>single-select<a class="headerlink" href="#single-select" title="Permalink to this headline">¶</a></h4>
-<p>A <code class="docutils literal"><span class="pre">single-select</span></code> type represents a list of outcomes, producing a select box in the dapp. It is expressed as a zero-indexed, json-encoded array.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">single-select</span></code> type represents a list of outcomes, producing a select box in the dapp. It is expressed as a zero-indexed, json-encoded array.</p>
 <p>Which party’s nominee won the 2016 US presidential election?</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">0</span></code>: Democrat</li>
-<li><code class="docutils literal"><span class="pre">1</span></code>: Republican</li>
-<li><code class="docutils literal"><span class="pre">2</span></code>: Libertarian</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code>: Democrat</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: Republican</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code>: Libertarian</p></li>
 </ul>
-<p>The outcomes are supplied in a field called <code class="docutils literal"><span class="pre">outcomes</span></code>. There is also an <code class="docutils literal"><span class="pre">invalid</span></code> option (<code class="docutils literal"><span class="pre">0xff..ff</span></code>) which is added automatically.</p>
-<p><code class="docutils literal"><span class="pre">[&quot;Democrat&quot;,</span> <span class="pre">&quot;Republican&quot;,</span> <span class="pre">&quot;Libertarian&quot;]</span></code></p>
+<p>The outcomes are supplied in a field called <code class="docutils literal notranslate"><span class="pre">outcomes</span></code>. There is also an <code class="docutils literal notranslate"><span class="pre">invalid</span></code> option (<code class="docutils literal notranslate"><span class="pre">0xff..ff</span></code>) which is added automatically.</p>
+<p><code class="docutils literal notranslate"><span class="pre">[&quot;Democrat&quot;,</span> <span class="pre">&quot;Republican&quot;,</span> <span class="pre">&quot;Libertarian&quot;]</span></code></p>
 </div>
 <div class="section" id="multiple-select">
 <h4>multiple-select<a class="headerlink" href="#multiple-select" title="Permalink to this headline">¶</a></h4>
-<p>The <code class="docutils literal"><span class="pre">multiple-select</span></code> type represents a list of outcomes, producing checkboxes in the dapp. It is Expressed as a one-indexed, json-encoded array.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">multiple-select</span></code> type represents a list of outcomes, producing checkboxes in the dapp. It is Expressed as a one-indexed, json-encoded array.</p>
 <p>Which party’s nominee won the seats the House in the 2016 congressional elections?</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">1</span></code>: Democrat</li>
-<li><code class="docutils literal"><span class="pre">2</span></code>: Republican</li>
-<li><code class="docutils literal"><span class="pre">4</span></code>: Libertarian</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: Democrat</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code>: Republican</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">4</span></code>: Libertarian</p></li>
 </ul>
-<p>These are added together, so <code class="docutils literal"><span class="pre">0</span></code> would mean than none were selected, (<code class="docutils literal"><span class="pre">1</span></code> + <code class="docutils literal"><span class="pre">2</span></code>) = <code class="docutils literal"><span class="pre">3</span></code> would indicate Democrat and Republican, (<code class="docutils literal"><span class="pre">1</span></code> + <code class="docutils literal"><span class="pre">4</span></code>) = <code class="docutils literal"><span class="pre">5</span></code> would indicate Democrat and Libertarian, etc. There is also an <code class="docutils literal"><span class="pre">0xff..ff</span></code>: Invalid option.</p>
-<p>The outcomes are supplied in a field called <code class="docutils literal"><span class="pre">outcomes</span></code>, as with <code class="docutils literal"><span class="pre">single-select</span></code>.
-<code class="docutils literal"><span class="pre">[&quot;Democrat&quot;,</span> <span class="pre">&quot;Republican&quot;,</span> <span class="pre">&quot;Libertarian&quot;]</span></code></p>
+<p>These are added together, so <code class="docutils literal notranslate"><span class="pre">0</span></code> would mean than none were selected, (<code class="docutils literal notranslate"><span class="pre">1</span></code> + <code class="docutils literal notranslate"><span class="pre">2</span></code>) = <code class="docutils literal notranslate"><span class="pre">3</span></code> would indicate Democrat and Republican, (<code class="docutils literal notranslate"><span class="pre">1</span></code> + <code class="docutils literal notranslate"><span class="pre">4</span></code>) = <code class="docutils literal notranslate"><span class="pre">5</span></code> would indicate Democrat and Libertarian, etc. There is also an <code class="docutils literal notranslate"><span class="pre">0xff..ff</span></code>: Invalid option.</p>
+<p>The outcomes are supplied in a field called <code class="docutils literal notranslate"><span class="pre">outcomes</span></code>, as with <code class="docutils literal notranslate"><span class="pre">single-select</span></code>.
+<code class="docutils literal notranslate"><span class="pre">[&quot;Democrat&quot;,</span> <span class="pre">&quot;Republican&quot;,</span> <span class="pre">&quot;Libertarian&quot;]</span></code></p>
 </div>
 <div class="section" id="datetime">
 <h4>datetime<a class="headerlink" href="#datetime" title="Permalink to this headline">¶</a></h4>
-<p>A <code class="docutils literal"><span class="pre">datetime</span></code> type represents a question that is answered with a date/time. This will be represented as a date picker in the UI, and expressed as a unix timestamp (seconds since 1970), of <code class="docutils literal"><span class="pre">0xff..ff</span></code> for invalid.</p>
+<p>A <code class="docutils literal notranslate"><span class="pre">datetime</span></code> type represents a question that is answered with a date/time. This will be represented as a date picker in the UI, and expressed as a unix timestamp (seconds since 1970), of <code class="docutils literal notranslate"><span class="pre">0xff..ff</span></code> for invalid.</p>
 </div>
 </div>
 </div>
 <div class="section" id="how-questions-are-structured">
 <h2>How questions are structured<a class="headerlink" href="#how-questions-are-structured" title="Permalink to this headline">¶</a></h2>
-<p>Questions are expressed as a JSON object. This should specify a <code class="docutils literal"><span class="pre">title</span></code> and a <code class="docutils literal"><span class="pre">type</span></code>, and may also include a <code class="docutils literal"><span class="pre">category</span></code> and <code class="docutils literal"><span class="pre">lang</span></code> field. It may include other fields depending on the type, such as <code class="docutils literal"><span class="pre">outcomes</span></code> to specify the possible outcomes in a <code class="docutils literal"><span class="pre">single-select</span></code> or <code class="docutils literal"><span class="pre">multiple-select</span></code>, or <code class="docutils literal"><span class="pre">decimals</span></code> in a <code class="docutils literal"><span class="pre">uint</span></code> type.</p>
+<p>Questions are expressed as a JSON object. This should specify a <code class="docutils literal notranslate"><span class="pre">title</span></code> and a <code class="docutils literal notranslate"><span class="pre">type</span></code>, and may also include a <code class="docutils literal notranslate"><span class="pre">category</span></code> and <code class="docutils literal notranslate"><span class="pre">lang</span></code> field. It may include other fields depending on the type, such as <code class="docutils literal notranslate"><span class="pre">outcomes</span></code> to specify the possible outcomes in a <code class="docutils literal notranslate"><span class="pre">single-select</span></code> or <code class="docutils literal notranslate"><span class="pre">multiple-select</span></code>, or <code class="docutils literal notranslate"><span class="pre">decimals</span></code> in a <code class="docutils literal notranslate"><span class="pre">uint</span></code> type.</p>
 <p>Example:
-<code class="docutils literal"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;Did</span> <span class="pre">Trump</span> <span class="pre">win</span> <span class="pre">the</span> <span class="pre">2016</span> <span class="pre">US</span> <span class="pre">presidential</span> <span class="pre">election?&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;bool&quot;,</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;politics&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;en&quot;}</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;Did</span> <span class="pre">Trump</span> <span class="pre">win</span> <span class="pre">the</span> <span class="pre">2016</span> <span class="pre">US</span> <span class="pre">presidential</span> <span class="pre">election?&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;bool&quot;,</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;politics&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;en&quot;}</span></code></p>
 <div class="section" id="templates">
 <span id="id1"></span><h3>Templates<a class="headerlink" href="#templates" title="Permalink to this headline">¶</a></h3>
 <p>To avoid duplication and resulting gas fees, parts common to many questions are included in a pre-defined <em>template</em>. The <em>template</em> includes placeholders, and each question only needs to pass in the data necessary to replace the placeholders.</p>
 <p>The following templates are built in, one for each question type:</p>
 <blockquote>
 <div><ul class="simple">
-<li><code class="docutils literal"><span class="pre">0</span></code>: <code class="docutils literal"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;bool&quot;,</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;%s&quot;}</span></code></li>
-<li><code class="docutils literal"><span class="pre">1</span></code>: <code class="docutils literal"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;uint&quot;,</span> <span class="pre">&quot;decimals&quot;:</span> <span class="pre">18,</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;%s&quot;}</span></code></li>
-<li><code class="docutils literal"><span class="pre">2</span></code>: <code class="docutils literal"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;single-select&quot;,</span> <span class="pre">&quot;outcomes&quot;:</span> <span class="pre">[%s],</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;%s&quot;}</span></code></li>
-<li><code class="docutils literal"><span class="pre">3</span></code>: <code class="docutils literal"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;multiple-select&quot;,</span> <span class="pre">&quot;outcomes&quot;:</span> <span class="pre">[%s],</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;%s&quot;}</span></code></li>
-<li><code class="docutils literal"><span class="pre">4</span></code>: <code class="docutils literal"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;datetime&quot;,</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;%s&quot;}</span></code></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">0</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;bool&quot;,</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;%s&quot;}</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">1</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;uint&quot;,</span> <span class="pre">&quot;decimals&quot;:</span> <span class="pre">18,</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;%s&quot;}</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">2</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;single-select&quot;,</span> <span class="pre">&quot;outcomes&quot;:</span> <span class="pre">[%s],</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;%s&quot;}</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">3</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;multiple-select&quot;,</span> <span class="pre">&quot;outcomes&quot;:</span> <span class="pre">[%s],</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;%s&quot;}</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">4</span></code>: <code class="docutils literal notranslate"><span class="pre">{&quot;title&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;type&quot;:</span> <span class="pre">&quot;datetime&quot;,</span> <span class="pre">&quot;category&quot;:</span> <span class="pre">&quot;%s&quot;,</span> <span class="pre">&quot;lang&quot;:</span> <span class="pre">&quot;%s&quot;}</span></code></p></li>
 </ul>
 </div></blockquote>
 <p>See <a class="reference internal" href="#creating-templates"><span class="std std-ref">Custom templates</span></a> for how and why you can create your own custom template.</p>
 <p>Questions are creating by combining the ID of the template (for example, <cite>2</cite> for the built-in single-select template) with the unicode delimiter characther “␟”.</p>
 <p>For example, a simple boolean question intended for the category “news-politics” might use the string:
-<code class="docutils literal"><span class="pre">Did</span> <span class="pre">Donald</span> <span class="pre">Trump</span> <span class="pre">win</span> <span class="pre">the</span> <span class="pre">2016</span> <span class="pre">US</span> <span class="pre">presidential</span> <span class="pre">election?␟news-politics␟en</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">Did</span> <span class="pre">Donald</span> <span class="pre">Trump</span> <span class="pre">win</span> <span class="pre">the</span> <span class="pre">2016</span> <span class="pre">US</span> <span class="pre">presidential</span> <span class="pre">election?␟news-politics␟en</span></code></p>
 <p>A question with multiple outcomes will need the JSON-encoded outcome list passed in, eg
-<code class="docutils literal"><span class="pre">Which</span> <span class="pre">party's</span> <span class="pre">nominee</span> <span class="pre">won</span> <span class="pre">the</span> <span class="pre">2016</span> <span class="pre">US</span> <span class="pre">presidential</span> <span class="pre">election?␟&quot;Democrat&quot;,&quot;Republican&quot;,&quot;Libertarian&quot;␟news-politics␟en</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">Which</span> <span class="pre">party's</span> <span class="pre">nominee</span> <span class="pre">won</span> <span class="pre">the</span> <span class="pre">2016</span> <span class="pre">US</span> <span class="pre">presidential</span> <span class="pre">election?␟&quot;Democrat&quot;,&quot;Republican&quot;,&quot;Libertarian&quot;␟news-politics␟en</span></code></p>
 </div>
 </div>
 <div class="section" id="asking-questions">
 <h2>Asking questions<a class="headerlink" href="#asking-questions" title="Permalink to this headline">¶</a></h2>
-<p>You can ask a new question by calling the <code class="docutils literal"><span class="pre">askQuestion()</span></code> function.</p>
-<p>The content of the question defined as a combination of a numerical <code class="docutils literal"><span class="pre">template_id</span></code> and a <code class="docutils literal"><span class="pre">string</span></code> of parameters.</p>
-<div class="highlight-javascript"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6
-7
-8
-9</pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kd">function</span> <span class="nx">askQuestion</span><span class="p">(</span>
+<p>You can ask a new question by calling the <code class="docutils literal notranslate"><span class="pre">askQuestion()</span></code> function.</p>
+<p>The content of the question defined as a combination of a numerical <code class="docutils literal notranslate"><span class="pre">template_id</span></code> and a <code class="docutils literal notranslate"><span class="pre">string</span></code> of parameters.</p>
+<div class="highlight-javascript notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span>
+<span class="normal">8</span>
+<span class="normal">9</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kd">function</span> <span class="nx">askQuestion</span><span class="p">(</span>
    <span class="nx">uint256</span> <span class="nx">template_id</span><span class="p">,</span>
    <span class="nx">string</span> <span class="nx">question</span><span class="p">,</span>
    <span class="nx">address</span> <span class="nx">arbitrator</span><span class="p">,</span>
@@ -301,31 +302,31 @@
 </pre></div>
 </td></tr></table></div>
 <p>If the arbitrator you have selected charges a per-question fee, you must supply at least this much ETH. Any additonal ETH you send with this call will be assigned as a reward to whoever supplies the final answer to the question. See <a class="reference internal" href="fees.html"><span class="doc">Fees and payments</span></a> for more information.</p>
-<p>See <a class="reference internal" href="#templates"><span class="std std-ref">Templates</span></a> for the <code class="docutils literal"><span class="pre">template_id</span></code>, and how the <code class="docutils literal"><span class="pre">question</span></code> parameter is structured.</p>
-<p>The <code class="docutils literal"><span class="pre">arbitrator</span></code> is the address of the contract that will be able to arbitrate. See <a class="reference internal" href="arbitrators.html"><span class="doc">Arbitrators</span></a> for more information.</p>
-<p>The <code class="docutils literal"><span class="pre">timeout</span></code> is the time in seconds the question will have after adding an answer before it is automatically finalized. It would typically be around <code class="docutils literal"><span class="pre">1</span> <span class="pre">days</span></code>. The contract sanity-checks set the maximum possible value at <code class="docutils literal"><span class="pre">365</span> <span class="pre">days</span></code>.</p>
-<p>The <code class="docutils literal"><span class="pre">opening_ts</span></code> is the timestamp for the earliest time at which it will be possible to post an answer to the question. You can use <code class="docutils literal"><span class="pre">0</span></code> if you intend the question to be answerable immediately.</p>
-<p>The <code class="docutils literal"><span class="pre">nonce</span></code> is a user-supplied number that can be used to disambiguated deliberate repeated uses of the same question. You can use <code class="docutils literal"><span class="pre">0</span></code> if you never intend to ask the same question with the same settings twice.</p>
-<p>Any ETH provided with the <code class="docutils literal"><span class="pre">askQuestion</span></code> call will be used as a question reward, minus any fee the specified arbitrator requires when a new question is asked.</p>
-<p>The <code class="docutils literal"><span class="pre">askQuestion</span></code> call returns a <code class="docutils literal"><span class="pre">bytes32</span></code> ID. This ID is made by hashing the parameters, plus <code class="docutils literal"><span class="pre">msg.sender</span></code>.</p>
+<p>See <a class="reference internal" href="#templates"><span class="std std-ref">Templates</span></a> for the <code class="docutils literal notranslate"><span class="pre">template_id</span></code>, and how the <code class="docutils literal notranslate"><span class="pre">question</span></code> parameter is structured.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">arbitrator</span></code> is the address of the contract that will be able to arbitrate. See <a class="reference internal" href="arbitrators.html"><span class="doc">Arbitrators</span></a> for more information.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is the time in seconds the question will have after adding an answer before it is automatically finalized. It would typically be around <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">days</span></code>. The contract sanity-checks set the maximum possible value at <code class="docutils literal notranslate"><span class="pre">365</span> <span class="pre">days</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">opening_ts</span></code> is the timestamp for the earliest time at which it will be possible to post an answer to the question. You can use <code class="docutils literal notranslate"><span class="pre">0</span></code> if you intend the question to be answerable immediately.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">nonce</span></code> is a user-supplied number that can be used to disambiguated deliberate repeated uses of the same question. You can use <code class="docutils literal notranslate"><span class="pre">0</span></code> if you never intend to ask the same question with the same settings twice.</p>
+<p>Any ETH provided with the <code class="docutils literal notranslate"><span class="pre">askQuestion</span></code> call will be used as a question reward, minus any fee the specified arbitrator requires when a new question is asked.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">askQuestion</span></code> call returns a <code class="docutils literal notranslate"><span class="pre">bytes32</span></code> ID. This ID is made by hashing the parameters, plus <code class="docutils literal notranslate"><span class="pre">msg.sender</span></code>.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">The Etherscan “write contract” feature has been known to mangle the delimiter character.</p>
+<p class="admonition-title">Note</p>
+<p>The Etherscan “write contract” feature has been known to mangle the delimiter character.</p>
 </div>
 <div class="section" id="accepting-an-answer-only-if-something-has-happened">
 <h3>Accepting an answer only if something has happened<a class="headerlink" href="#accepting-an-answer-only-if-something-has-happened" title="Permalink to this headline">¶</a></h3>
 <p>Once a question has been created and the opening date (if set) reached, it can be answered immediately.</p>
 <p>In many cases you are not interested in the result of a particular question until it has a particular answer. For example, if you have a contract insuring against my house burning down, you are only interested in the result if my house burned down. You don’t care about all the times in between setting up the policy and claiming when my house didn’t burn down.</p>
 <p>You may also want to screen out results indicating “unknown” or “no way to tell” or “hasn’t happened yet”.</p>
-<p>One approach is that instead of waiting for the result of a specific <code class="docutils literal"><span class="pre">question_id</span></code>, you specify the type of question you want, then wait for a user to send you a question ID with the appropriate content and settings.</p>
-<p>To make this easier, we provide a method called <code class="docutils literal"><span class="pre">getFinalAnswerIfMatches()</span></code>. This will throw an error not only if the question is not yet answered, but also if the content doesn’t match, the bond or timeout is too low, or the arbitrator is not the one you expect.</p>
-<div class="highlight-javascript"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5
-6
-7</pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="kd">function</span> <span class="nx">getFinalAnswerIfMatches</span><span class="p">(</span>
+<p>One approach is that instead of waiting for the result of a specific <code class="docutils literal notranslate"><span class="pre">question_id</span></code>, you specify the type of question you want, then wait for a user to send you a question ID with the appropriate content and settings.</p>
+<p>To make this easier, we provide a method called <code class="docutils literal notranslate"><span class="pre">getFinalAnswerIfMatches()</span></code>. This will throw an error not only if the question is not yet answered, but also if the content doesn’t match, the bond or timeout is too low, or the arbitrator is not the one you expect.</p>
+<div class="highlight-javascript notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span>
+<span class="normal">6</span>
+<span class="normal">7</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="kd">function</span> <span class="nx">getFinalAnswerIfMatches</span><span class="p">(</span>
      <span class="nx">bytes32</span> <span class="nx">question_id</span><span class="p">,</span>
      <span class="nx">bytes32</span> <span class="nx">content_hash</span><span class="p">,</span>
      <span class="nx">address</span> <span class="nx">arbitrator</span><span class="p">,</span>
@@ -334,66 +335,64 @@
  <span class="p">)</span> <span class="nx">returns</span> <span class="p">(</span><span class="nx">bytes32</span> <span class="nx">answer</span><span class="p">)</span>
 </pre></div>
 </td></tr></table></div>
-<p>You can then screen <code class="docutils literal"><span class="pre">answer</span></code> in your contract and only act on results that your contract is interested in.</p>
+<p>You can then screen <code class="docutils literal notranslate"><span class="pre">answer</span></code> in your contract and only act on results that your contract is interested in.</p>
 </div>
 </div>
 <div class="section" id="custom-templates">
 <span id="creating-templates"></span><h2>Custom templates<a class="headerlink" href="#custom-templates" title="Permalink to this headline">¶</a></h2>
 <p>If you want to create many similar requests, it will be more efficient to create your own template. For example, a flight insurance app might have:</p>
-<div class="highlight-json"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre>1
-2
-3
-4
-5</pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="p">{</span>
+<div class="highlight-json notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span>
+<span class="normal">2</span>
+<span class="normal">3</span>
+<span class="normal">4</span>
+<span class="normal">5</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="p">{</span>
      <span class="nt">&quot;title&quot;</span><span class="p">:</span> <span class="s2">&quot;Was flight %s on date %s delayed by more than 3 hours?&quot;</span><span class="p">,</span>
      <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;bool&quot;</span><span class="p">,</span>
      <span class="nt">&quot;category&quot;</span><span class="p">:</span> <span class="s2">&quot;flight-information&quot;</span>
  <span class="p">}</span>
 </pre></div>
 </td></tr></table></div>
-<dl class="docutils">
-<dt>This can then by called with a string including only the flight number, the delimiter and the date, eg:</dt>
-<dd><code class="docutils literal"><span class="pre">MH17␟2017-12-01</span></code></dd>
+<dl class="simple">
+<dt>This can then by called with a string including only the flight number, the delimiter and the date, eg:</dt><dd><p><code class="docutils literal notranslate"><span class="pre">MH17␟2017-12-01</span></code></p>
+</dd>
 </dl>
-<p>A template can be created by calling <code class="docutils literal"><span class="pre">createTemplate(&quot;template&quot;)</span></code>, where “template” is the JSON template. This returns a numerical ID.</p>
+<p>A template can be created by calling <code class="docutils literal notranslate"><span class="pre">createTemplate(&quot;template&quot;)</span></code>, where “template” is the JSON template. This returns a numerical ID.</p>
 </div>
 <div class="section" id="making-sure-a-question-has-an-answer">
 <h2>Making sure a question has an answer<a class="headerlink" href="#making-sure-a-question-has-an-answer" title="Permalink to this headline">¶</a></h2>
 <p>As discussed in <a class="reference internal" href="availability.html"><span class="doc">Unavailability and null responses</span></a>, when a question is asked, the answer may be “don’t know” or “don’t understand” or “this isn’t settled yet”. Contracts relying on Reality.eth for information need to be designed to take account of this possibility.</p>
-<p>After settlement Reality.eth will preserve information about the <code class="docutils literal"><span class="pre">content_hash</span></code>, <code class="docutils literal"><span class="pre">arbitrator</span></code>, <code class="docutils literal"><span class="pre">timeout</span></code>, <code class="docutils literal"><span class="pre">finalization_ts</span></code> (finalization timestamp) and highest-posted <code class="docutils literal"><span class="pre">bond</span></code>. Contracts can either check this information directly or pass their requirements to <code class="docutils literal"><span class="pre">getFinalAnswerIfMatches()</span></code>.</p>
+<p>After settlement Reality.eth will preserve information about the <code class="docutils literal notranslate"><span class="pre">content_hash</span></code>, <code class="docutils literal notranslate"><span class="pre">arbitrator</span></code>, <code class="docutils literal notranslate"><span class="pre">timeout</span></code>, <code class="docutils literal notranslate"><span class="pre">finalization_ts</span></code> (finalization timestamp) and highest-posted <code class="docutils literal notranslate"><span class="pre">bond</span></code>. Contracts can either check this information directly or pass their requirements to <code class="docutils literal notranslate"><span class="pre">getFinalAnswerIfMatches()</span></code>.</p>
 </div>
 </div>
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="availability.html" class="btn btn-neutral float-right" title="Unavailability and null responses" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="dapp.html" class="btn btn-neutral" title="Using the Reality.eth dapp" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="availability.html" class="btn btn-neutral float-right" title="Unavailability and null responses" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="dapp.html" class="btn btn-neutral float-left" title="Using the Reality.eth dapp" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, KK Social Minds.
+        &#169; Copyright 2017, KK Social Minds.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -402,37 +401,15 @@
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

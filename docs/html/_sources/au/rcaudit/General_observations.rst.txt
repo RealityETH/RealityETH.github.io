@@ -1,8 +1,0 @@
-General observations
-====================
-
-The coding style is clear and idiomatic. The design of the program is efficient as it is (1) storing only consensus relevant data and (2) minimizing
-*gas *
-needs in recurrently used code parts.
-
-The author has paid attention to incorporate most of the good practices that the solidity developer community has found in the past. Low level errors are not present as the first pass shows (3 days of code reading)

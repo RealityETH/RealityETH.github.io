@@ -1,4 +1,0 @@
-Final Conclusions
-=================
-
-The recommendations were accepted by the RealityKeys Team. The following modifications didn't bear potential to introduce new vulnerabilities.

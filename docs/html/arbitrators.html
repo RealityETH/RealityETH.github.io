@@ -1,58 +1,55 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8">
+  <meta charset="utf-8" />
   
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Arbitrators &mdash; reality.eth  documentation</title>
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
   
+  
+
   
   
 
   
 
   
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="reality.eth  documentation" href="index.html"/>
-        <link rel="next" title="Fees and payments" href="fees.html"/>
-        <link rel="prev" title="Unavailability and null responses" href="availability.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Fees and payments" href="fees.html" />
+    <link rel="prev" title="Unavailability and null responses" href="availability.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
    
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
@@ -79,6 +76,7 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
@@ -113,13 +111,14 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+      <nav class="wy-nav-top" aria-label="top navigation">
         
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="index.html">reality.eth</a>
@@ -127,10 +126,13 @@
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
 
 
 
@@ -150,14 +152,14 @@
 
   <ul class="wy-breadcrumbs">
     
-      <li><a href="index.html">Docs</a> &raquo;</li>
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
       <li>Arbitrators</li>
     
     
       <li class="wy-breadcrumbs-aside">
         
-            
+          
             <a href="_sources/arbitrators.rst.txt" rel="nofollow"> View page source</a>
           
         
@@ -207,30 +209,31 @@
 <h2>Creating and using an arbitration contract<a class="headerlink" href="#creating-and-using-an-arbitration-contract" title="Permalink to this headline">¶</a></h2>
 <p>Arbitrator contracts should expose the following functions to users:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">function</span> <span class="pre">getDisputeFee(bytes32</span> <span class="pre">question_id)</span> <span class="pre">constant</span> <span class="pre">returns</span> <span class="pre">(uint256)</span></code></li>
-<li><code class="docutils literal"><span class="pre">function</span> <span class="pre">requestArbitration(bytes32</span> <span class="pre">question_id)</span></code></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">function</span> <span class="pre">getDisputeFee(bytes32</span> <span class="pre">question_id)</span> <span class="pre">constant</span> <span class="pre">returns</span> <span class="pre">(uint256)</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">function</span> <span class="pre">requestArbitration(bytes32</span> <span class="pre">question_id)</span></code></p></li>
 </ul>
-<p>When <code class="docutils literal"><span class="pre">requestArbitration()</span></code> is called with a sufficient fee, they should call the following against the Reality.eth contract:</p>
+<p>When <code class="docutils literal notranslate"><span class="pre">requestArbitration()</span></code> is called with a sufficient fee, they should call the following against the Reality.eth contract:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">notifyOfArbitrationRequest(bytes32</span> <span class="pre">question_id,</span> <span class="pre">address</span> <span class="pre">requester)</span></code></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">notifyOfArbitrationRequest(bytes32</span> <span class="pre">question_id,</span> <span class="pre">address</span> <span class="pre">requester)</span></code></p></li>
 </ul>
 <p>When they produce an answer, they should settle the contract with:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">submitAnswerByArbitrator(bytes32</span> <span class="pre">question_id,</span> <span class="pre">bytes32</span> <span class="pre">answer,</span> <span class="pre">address</span> <span class="pre">answerer)</span></code></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">submitAnswerByArbitrator(bytes32</span> <span class="pre">question_id,</span> <span class="pre">bytes32</span> <span class="pre">answer,</span> <span class="pre">address</span> <span class="pre">answerer)</span></code></p></li>
 </ul>
-<p>If the result of arbitration is to affirm the answer given by the final answerer, the person who gave that answer should be supplied as <code class="docutils literal"><span class="pre">answerer</span></code>. If the result of arbitration is to change the final answer, the <code class="docutils literal"><span class="pre">answerer</span></code> supplied should be the user who paid for arbitration.</p>
+<p>If the result of arbitration is to affirm the answer given by the final answerer, the person who gave that answer should be supplied as <code class="docutils literal notranslate"><span class="pre">answerer</span></code>. If the result of arbitration is to change the final answer, the <code class="docutils literal notranslate"><span class="pre">answerer</span></code> supplied should be the user who paid for arbitration.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Sometimes the answer the arbitrator finalizes on will already have been given earlier, but with a lower bond. It may appear fairer to some for the arbitrator to set the <code class="docutils literal"><span class="pre">answerer</span></code> as the person who previously gave that answer, not the person who paid. However, for all we know the person who gave the correct answer could be a sock puppet belonging to the person who gave the final, wrong answer. Rewarding them would remove the disincentive to lie. For the system the incentive system to work correctly, it is essential that the arbitrator choose the person who paid them as the <code class="docutils literal"><span class="pre">answerer</span></code>, unless the pre-existing final answer was correct.</p>
+<p class="admonition-title">Note</p>
+<p>Sometimes the answer the arbitrator finalizes on will already have been given earlier, but with a lower bond. It may appear fairer to some for the arbitrator to set the <code class="docutils literal notranslate"><span class="pre">answerer</span></code> as the person who previously gave that answer, not the person who paid. However, for all we know the person who gave the correct answer could be a sock puppet belonging to the person who gave the final, wrong answer. Rewarding them would remove the disincentive to lie. For the system the incentive system to work correctly, it is essential that the arbitrator choose the person who paid them as the <code class="docutils literal notranslate"><span class="pre">answerer</span></code>, unless the pre-existing final answer was correct.</p>
 </div>
 </div>
 <div class="section" id="getting-information-about-the-arbitrator">
 <h2>Getting information about the arbitrator<a class="headerlink" href="#getting-information-about-the-arbitrator" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">function</span> <span class="pre">realitio()</span></code> should provide the address of the Reality.eth contract to which the arbitrator responds.</li>
-<li><code class="docutils literal"><span class="pre">function</span> <span class="pre">metadata()</span></code> should provide a string of json-encoded metadata. The following properties are scheduled for implementation in the Reality.eth dapp:<ul>
-<li><code class="docutils literal"><span class="pre">tos</span></code>: A URI representing the location of a terms-of-service document for the arbitrator.</li>
-<li><code class="docutils literal"><span class="pre">template_hashes</span></code>: An array of hashes of templates supported by the arbitrator. If you have a numerical ID for a template registered with Reality.eth, you can look up this hash by calling the Reality.eth <code class="docutils literal"><span class="pre">template_hashes()</span></code> function.</li>
+<li><p><code class="docutils literal notranslate"><span class="pre">function</span> <span class="pre">realitio()</span></code> should provide the address of the Reality.eth contract to which the arbitrator responds.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">function</span> <span class="pre">metadata()</span></code> should provide a string of json-encoded metadata. The following properties are scheduled for implementation in the Reality.eth dapp:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">tos</span></code>: A URI representing the location of a terms-of-service document for the arbitrator.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">template_hashes</span></code>: An array of hashes of templates supported by the arbitrator. If you have a numerical ID for a template registered with Reality.eth, you can look up this hash by calling the Reality.eth <code class="docutils literal notranslate"><span class="pre">template_hashes()</span></code> function.</p></li>
 </ul>
 </li>
 </ul>
@@ -239,34 +242,32 @@
 
 
            </div>
-           <div class="articleComments">
-            
-           </div>
+           
           </div>
           <footer>
-  
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-      
-        <a href="fees.html" class="btn btn-neutral float-right" title="Fees and payments" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
-      
-      
-        <a href="availability.html" class="btn btn-neutral" title="Unavailability and null responses" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
-      
+        <a href="fees.html" class="btn btn-neutral float-right" title="Fees and payments" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="availability.html" class="btn btn-neutral float-left" title="Unavailability and null responses" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
-  
 
   <hr/>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2017, KK Social Minds.
+        &#169; Copyright 2017, KK Social Minds.
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
-
         </div>
       </div>
 
@@ -275,37 +276,15 @@
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true,
-            SOURCELINK_SUFFIX: '.txt'
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>
