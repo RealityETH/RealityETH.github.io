@@ -2128,6 +2128,23 @@ module.exports={
         "blockExplorerUrls": [
             "https://blockscout.com/poa/xdai/"
         ]
+    },
+    "137": {
+        "chainId": "0x89",
+        "chainName": "Matic Mainnet",
+        "nativeCurrency": {
+            "name": "Matic",
+            "symbol": "MATIC",
+            "decimals": 18
+        },
+        "rpcUrls": [
+            "https://rpc-mainnet.matic.network",
+            "wss://ws-mainnet.matic.network"
+        ],
+        "hostedRPC": "https://rpc-mainnet.matic.network",
+        "blockExplorerUrls": [
+            "https://polygonscan.com/"
+        ]
     }
 }
 },{}],6:[function(require,module,exports){
@@ -2263,6 +2280,23 @@ module.exports={
                 }
             }
         }
+    },
+    "137": {
+        "MATIC": {
+            "Arbitrator": {
+                "address": "0xec634BD4c5766e96dbDC3cf89D15B4D340690118",
+                "block": 15610148,
+                "reality_eth_address": "0xA75AE6D61Dd9d55e8153A393E2fc859c6a0FC716"
+            },
+            "RealityETH-2.1": {
+                "address": "0xA75AE6D61Dd9d55e8153A393E2fc859c6a0FC716",
+                "block": 15610082,
+                "notes": null,
+                "arbitrators": {
+                    "0xec634BD4c5766e96dbDC3cf89D15B4D340690118": "Reality.eth team (testing only)"
+                }
+            }
+        }
     }
 }
 },{}],7:[function(require,module,exports){
@@ -2281,6 +2315,13 @@ module.exports={
             "1": true,
             "4": true,
             "42": true
+        }
+    },
+    "MATIC": {
+        "decimals": 1000000000000000000,
+        "small_number": 1000000000000000000,
+        "native_networks": {
+            "137": true
         }
     },
     "POLK": {
