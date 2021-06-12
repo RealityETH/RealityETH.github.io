@@ -5511,6 +5511,9 @@ function populateQuestionWindow(rcqa, question_detail, is_refresh) {
             //rcqa.find('.arbitrator').text(question_detail[Qi_arbitrator]);
             rcqa.find('.arbitration-fee').text(decimalizedBigNumberToHuman(fee, true));
             rcqa.find('.arbitration-button').removeClass('unpopulated');
+            if (chain_info.nativeCurrency && chain_info.nativeCurrency.symbol) {
+                rcqa.find('.token-always-native').text(chain_info.nativeCurrency.symbol);
+            }
         }).catch(function (err) {
             console.log('caught error with getDisputeFee');
             // If it doesn't implement the getDisputeFee method, we might want to use foreignProxy
@@ -7531,15 +7534,15 @@ function displayWrongNetwork(specified, detected) {
     var specified_network_txt = $('.network-status.network-id-' + specified).text();
     var detected_network_txt = $('.network-status.network-id-' + detected).text();
     if (specified_network_txt == '') {
-        specified_network_txt = '[unknown]';
+        specified_network_txt = '[unknown network]';
     }
     if (detected_network_txt == '') {
-        detected_network_txt = '[unknown]';
+        detected_network_txt = '[unknown network]';
     }
     console.log(specified_network_txt, detected_network_txt);
 
-    var chain_info = rc_contracts.walletAddParameters(specified);
-    if (chain_info) {
+    var wallet_info = rc_contracts.walletAddParameters(specified);
+    if (wallet_info) {
         var lnk = $('<a>');
         lnk.text($('.add-network-button').text());
         lnk.bind('click', function (evt) {
@@ -7548,7 +7551,7 @@ function displayWrongNetwork(specified, detected) {
             console.log('getting', specified);
             ethereum.request({
                 method: 'wallet_addEthereumChain',
-                params: [chain_info]
+                params: [wallet_info]
             }).then(function (result) {
                 console.log('result was', result);
                 location.reload();
@@ -7597,6 +7600,10 @@ window.addEventListener('load', function () {
     // Set up a filter so we always know the latest block number.
     // This helps us keep track of how fresh our question data etc is.
     web3js.eth.filter('latest').watch(function (err, res) {
+        if (err) {
+            console.log('filter failed', err);
+            return;
+        }
         web3js.eth.getBlock('latest', function (err, result) {
             if (result.number > current_block_number) {
                 current_block_number = result.number;
