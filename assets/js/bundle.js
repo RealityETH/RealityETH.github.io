@@ -2002,6 +2002,7 @@ module.exports={
             "symbol": "ETH",
             "decimals": 18
         },
+        "network_name": "mainnet",
         "rpcUrls": [
             "https://api.mycryptoapi.com/eth",
             "https://cloudflare-eth.com"
@@ -2019,6 +2020,7 @@ module.exports={
             "symbol": "ROP",
             "decimals": 18
         },
+        "network_name": "ropsten",
         "rpcUrls": [],
         "hostedRPC": "https://ropsten.infura.io/tSrhlXUe1sNEO5ZWhpUK",
         "blockExplorerUrls": [
@@ -2033,6 +2035,7 @@ module.exports={
             "symbol": "RIN",
             "decimals": 18
         },
+        "network_name": "rinkeby",
         "rpcUrls": [],
         "hostedRPC": "https://rinkeby.socialminds.jp",
         "blockExplorerUrls": [
@@ -2047,6 +2050,7 @@ module.exports={
             "symbol": "KOV",
             "decimals": 18
         },
+        "network_name": "kovan",
         "rpcUrls": [
             "https://kovan.poa.network",
             "http://kovan.poa.network:8545",
@@ -2065,6 +2069,7 @@ module.exports={
             "symbol": "BNB",
             "decimals": 18
         },
+        "network_name": "bsc",
         "rpcUrls": [
             "https://bsc-dataseed1.binance.org",
             "https://bsc-dataseed2.binance.org",
@@ -2094,6 +2099,7 @@ module.exports={
             "symbol": "POA",
             "decimals": 18
         },
+        "network_name": "poa-sokol",
         "rpcUrls": [
             "https://sokol.poa.network",
             "wss://sokol.poa.network/wss",
@@ -2112,6 +2118,7 @@ module.exports={
             "symbol": "xDAI",
             "decimals": 18
         },
+        "network_name": "xdai",
         "rpcUrls": [
             "https://rpc.xdaichain.com",
             "https://xdai.poanetwork.dev",
@@ -2137,6 +2144,7 @@ module.exports={
             "symbol": "MATIC",
             "decimals": 18
         },
+        "network_name": "matic",
         "rpcUrls": [
             "https://rpc-mainnet.matic.network",
             "wss://ws-mainnet.matic.network"
@@ -2161,6 +2169,15 @@ module.exports={
                     "0xd47f72a2d1d0E91b0Ec5e5f5d02B2dc26d00A14D": "Kleros",
                     "0x4072cadf953ad0a1bbacbbb50ac513411ae620db": "Gnosis Corona Information Arbitrator"
                 }
+            }
+        },
+        "GNO": {
+            "RealityETH_ERC20-2.0": {
+                "address": "0x8f1CC53bf34932591177CDA24723486205CA7510",
+                "block": 12654677,
+                "token_address": "0x6810e776880c02933d47db1b9fc05908e5386b96",
+                "notes": null,
+                "arbitrators": {}
             }
         },
         "TRST": {
@@ -2315,6 +2332,13 @@ module.exports={
             "1": true,
             "4": true,
             "42": true
+        }
+    },
+    "GNO": {
+        "decimals": 100000000,
+        "small_number": 10000000,
+        "erc20_networks": {
+            "1": "0x6810e776880c02933d47db1b9fc05908e5386b96"
         }
     },
     "MATIC": {
