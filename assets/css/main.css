@@ -3545,6 +3545,19 @@ body.foreign-proxy-transaction-sent .foreign-proxy-transaction-sent-only {
   text-align: center;
   cursor: pointer; }
 
+.no-arbitrator-only {
+  display: none; }
+
+.no-arbitrator .no-arbitrator-only {
+  display: block; }
+
+.no-arbitrator-message {
+  font-size: 14px;
+  background-color: #f5f6f7;
+  padding: 6px;
+  border: 1px solid #56bbe8;
+  text-align: center; }
+
 .failed-arbitrator-only {
   display: none; }
 
