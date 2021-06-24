@@ -2073,7 +2073,7 @@ module.exports={
             "symbol": "BNB",
             "decimals": 18
         },
-        "network_name": "mainnet",
+        "network_name": "bsc",
         "rpcUrls": [
             "https://bsc-dataseed1.binance.org",
             "https://bsc-dataseed2.binance.org",
@@ -2111,6 +2111,7 @@ module.exports={
             "ws://sokol.poa.network:8546"
         ],
         "hostedRPC": "https://sokol.poa.network",
+        "graphURL": "https://api.thegraph.com/subgraphs/name/realityeth/realityeth-sokol",
         "blockExplorerUrls": [
             "https://blockscout.com/poa/sokol"
         ]
@@ -2123,7 +2124,7 @@ module.exports={
             "symbol": "xDAI",
             "decimals": 18
         },
-        "network_name": "mainnet",
+        "network_name": "xdai",
         "rpcUrls": [
             "https://rpc.xdaichain.com",
             "https://xdai.poanetwork.dev",
@@ -2156,6 +2157,7 @@ module.exports={
             "wss://ws-mainnet.matic.network"
         ],
         "hostedRPC": "https://rpc-mainnet.matic.network",
+        "graphURL": "https://api.thegraph.com/subgraphs/name/realityeth/realityeth-polygon",
         "blockExplorerUrls": [
             "https://polygonscan.com/"
         ]
