@@ -2145,7 +2145,7 @@ module.exports={
     },
     "137": {
         "chainId": "0x89",
-        "chainName": "Matic Mainnet",
+        "chainName": "Matic(Polygon) Mainnet",
         "nativeCurrency": {
             "name": "Matic",
             "symbol": "MATIC",
@@ -2154,11 +2154,14 @@ module.exports={
         "network_name": "matic",
         "rpcUrls": [
             "https://rpc-mainnet.matic.network",
-            "wss://ws-mainnet.matic.network"
+            "wss://ws-mainnet.matic.network",
+            "https://rpc-mainnet.matic.quiknode.pro",
+            "https://matic-mainnet.chainstacklabs.com"
         ],
         "hostedRPC": "https://rpc-mainnet.matic.network",
         "graphURL": "https://api.thegraph.com/subgraphs/name/realityeth/realityeth-polygon",
         "blockExplorerUrls": [
+            "https://polygonscan.com",
             "https://polygonscan.com/"
         ]
     }
@@ -2202,6 +2205,17 @@ module.exports={
         }
     },
     "4": {
+        "DAOOS": {
+            "RealityETH_ERC20-2.0": {
+                "address": "0x3B3ab861Deb4ED756e39f2f6A2634DEdfC182d38",
+                "block": 8903097,
+                "token_address": "0x56AE5fd086823d1892BACE27034Eb5531Fcdc3f8",
+                "notes": null,
+                "arbitrators": {
+                    "0x8368d613059dcbdBF909081Bb00190a01b0d5F9D": "daoOS DAO team (rinkeby main)"
+                }
+            }
+        },
         "ETH": {
             "RealityETH-2.0": {
                 "address": "0x3D00D77ee771405628a4bA4913175EcC095538da",
@@ -2342,18 +2356,33 @@ module.exports={
             "42": true
         }
     },
-    "GNO": {
-        "decimals": 100000000,
-        "small_number": 10000000,
-        "erc20_networks": {
-            "1": "0x6810e776880c02933d47db1b9fc05908e5386b96"
-        }
-    },
     "MATIC": {
         "decimals": 1000000000000000000,
         "small_number": 1000000000000000000,
         "native_networks": {
             "137": true
+        }
+    },
+    "XDAI": {
+        "decimals": 1000000000000000000,
+        "small_number": 1000000000000000000,
+        "native_networks": {
+            "77": true,
+            "100": true
+        }
+    },
+    "DAOOS": {
+        "decimals": 1000000000000000000,
+        "small_number": 1000000000000000000,
+        "erc20_networks": {
+            "4": "0x56AE5fd086823d1892BACE27034Eb5531Fcdc3f8"
+        }
+    },
+    "GNO": {
+        "decimals": 100000000,
+        "small_number": 10000000,
+        "erc20_networks": {
+            "1": "0x6810e776880c02933d47db1b9fc05908e5386b96"
         }
     },
     "POLK": {
@@ -2369,14 +2398,6 @@ module.exports={
         "erc20_networks": {
             "1": "0xcb94be6f13a1182e4a4b6140cb7bf2025d28e41b",
             "4": "0x21036C54e16521B8809553956123E44054120226"
-        }
-    },
-    "XDAI": {
-        "decimals": 1000000000000000000,
-        "small_number": 1000000000000000000,
-        "native_networks": {
-            "77": true,
-            "100": true
         }
     }
 }
@@ -2528,7 +2549,7 @@ function defaultTokenForNetwork(network_id) {
         if (!token_info) {
             continue;
         }
-        if (token_info.is_native) {
+        if (token_info[token].is_native) {
             return token;
         }
         if (!ret) {
