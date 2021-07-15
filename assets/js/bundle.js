@@ -36754,7 +36754,7 @@ module.exports={
   "_args": [
     [
       "elliptic@6.4.0",
-      "/home/ed/working/monorepo/packages/dapp"
+      "/var/www/html/monorepo-production/packages/dapp"
     ]
   ],
   "_from": "elliptic@6.4.0",
@@ -36779,7 +36779,7 @@ module.exports={
   ],
   "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.4.0.tgz",
   "_spec": "6.4.0",
-  "_where": "/home/ed/working/monorepo/packages/dapp",
+  "_where": "/var/www/html/monorepo-production/packages/dapp",
   "author": {
     "name": "Fedor Indutny",
     "email": "fedor@indutny.com"
@@ -78994,7 +78994,7 @@ module.exports={
   "_args": [
     [
       "truffle-contract-schema@0.0.5",
-      "/home/ed/working/monorepo/packages/dapp"
+      "/var/www/html/monorepo-production/packages/dapp"
     ]
   ],
   "_from": "truffle-contract-schema@0.0.5",
@@ -79018,7 +79018,7 @@ module.exports={
   ],
   "_resolved": "https://registry.npmjs.org/truffle-contract-schema/-/truffle-contract-schema-0.0.5.tgz",
   "_spec": "0.0.5",
-  "_where": "/home/ed/working/monorepo/packages/dapp",
+  "_where": "/var/www/html/monorepo-production/packages/dapp",
   "author": {
     "name": "Tim Coulter",
     "email": "tim.coulter@consensys.net"
@@ -79976,223 +79976,8 @@ arguments[4][307][0].apply(exports,arguments)
 },{"../solidity/coder":347,"../utils/utils":360,"./allevents":363,"./event":367,"./function":371,"dup":307}],366:[function(require,module,exports){
 arguments[4][308][0].apply(exports,arguments)
 },{"dup":308}],367:[function(require,module,exports){
-/*
-    This file is part of web3.js.
-
-    web3.js is free software: you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
-
-    web3.js is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU Lesser General Public License for more details.
-
-    You should have received a copy of the GNU Lesser General Public License
-    along with web3.js.  If not, see <http://www.gnu.org/licenses/>.
-*/
-/**
- * @file event.js
- * @author Marek Kotewicz <marek@ethdev.com>
- * @date 2014
- */
-
-var utils = require('../utils/utils');
-var coder = require('../solidity/coder');
-var formatters = require('./formatters');
-var sha3 = require('../utils/sha3');
-var Filter = require('./filter');
-var watches = require('./methods/watches');
-
-/**
- * This prototype should be used to create event filters
- */
-var SolidityEvent = function (requestManager, json, address) {
-    this._requestManager = requestManager;
-    this._params = json.inputs;
-    this._name = utils.transformToFullName(json);
-    this._address = address;
-    this._anonymous = json.anonymous;
-};
-
-/**
- * Should be used to get filtered param types
- *
- * @method types
- * @param {Bool} decide if returned typed should be indexed
- * @return {Array} array of types
- */
-SolidityEvent.prototype.types = function (indexed) {
-    return this._params.filter(function (i) {
-        return i.indexed === indexed;
-    }).map(function (i) {
-        return i.type;
-    });
-};
-
-/**
- * Should be used to get event display name
- *
- * @method displayName
- * @return {String} event display name
- */
-SolidityEvent.prototype.displayName = function () {
-    return utils.extractDisplayName(this._name);
-};
-
-/**
- * Should be used to get event type name
- *
- * @method typeName
- * @return {String} event type name
- */
-SolidityEvent.prototype.typeName = function () {
-    return utils.extractTypeName(this._name);
-};
-
-/**
- * Should be used to get event signature
- *
- * @method signature
- * @return {String} event signature
- */
-SolidityEvent.prototype.signature = function () {
-    return sha3(this._name);
-};
-
-/**
- * Should be used to encode indexed params and options to one final object
- *
- * @method encode
- * @param {Object} indexed
- * @param {Object} options
- * @return {Object} everything combined together and encoded
- */
-SolidityEvent.prototype.encode = function (indexed, options) {
-    indexed = indexed || {};
-    options = options || {};
-    var result = {};
-
-    ['fromBlock', 'toBlock'].filter(function (f) {
-        return options[f] !== undefined;
-    }).forEach(function (f) {
-        result[f] = formatters.inputBlockNumberFormatter(options[f]);
-    });
-
-    result.topics = [];
-
-    result.address = this._address;
-    if (!this._anonymous) {
-        result.topics.push('0x' + this.signature());
-    }
-
-    var indexedTopics = this._params.filter(function (i) {
-        return i.indexed === true;
-    }).map(function (i) {
-        var value = indexed[i.name];
-        if (value === undefined || value === null) {
-            return null;
-        }
-
-        if (utils.isArray(value)) {
-            return value.map(function (v) {
-                return '0x' + coder.encodeParam(i.type, v);
-            });
-        }
-        return '0x' + coder.encodeParam(i.type, value);
-    });
-
-    result.topics = result.topics.concat(indexedTopics);
-
-    return result;
-};
-
-/**
- * Should be used to decode indexed params and options
- *
- * @method decode
- * @param {Object} data
- * @return {Object} result object with decoded indexed && not indexed params
- */
-SolidityEvent.prototype.decode = function (data) {
-
-    try {
-
-    data.data = data.data || '';
-    data.topics = data.topics || [];
-
-    var argTopics = this._anonymous ? data.topics : data.topics.slice(1);
-    var indexedData = argTopics.map(function (topics) { return topics.slice(2); }).join("");
-    var indexedParams = coder.decodeParams(this.types(true), indexedData);
-
-    var notIndexedData = data.data.slice(2);
-    var notIndexedParams = coder.decodeParams(this.types(false), notIndexedData);
-
-    var result = formatters.outputLogFormatter(data);
-    result.event = this.displayName();
-    result.address = data.address;
-
-    result.args = this._params.reduce(function (acc, current) {
-        acc[current.name] = current.indexed ? indexedParams.shift() : notIndexedParams.shift();
-        return acc;
-    }, {});
-
-    delete result.data;
-    delete result.topics;
-
-    } catch (err) {
-        console.log('Caught invalid data');
-        result = {'invalid_data': true};
-    }
-
-    return result;
-};
-
-/**
- * Should be used to create new filter object from event
- *
- * @method execute
- * @param {Object} indexed
- * @param {Object} options
- * @return {Object} filter object
- */
-SolidityEvent.prototype.execute = function (indexed, options, callback) {
-
-    if (utils.isFunction(arguments[arguments.length - 1])) {
-        callback = arguments[arguments.length - 1];
-        if(arguments.length === 2)
-            options = null;
-        if(arguments.length === 1) {
-            options = null;
-            indexed = {};
-        }
-    }
-
-    var o = this.encode(indexed, options);
-    var formatter = this.decode.bind(this);
-    return new Filter(o, 'eth', this._requestManager, watches.eth(), formatter, callback);
-};
-
-/**
- * Should be used to attach event to contract object
- *
- * @method attachToContract
- * @param {Contract}
- */
-SolidityEvent.prototype.attachToContract = function (contract) {
-    var execute = this.execute.bind(this);
-    var displayName = this.displayName();
-    if (!contract[displayName]) {
-        contract[displayName] = execute;
-    }
-    contract[displayName][this.typeName()] = this.execute.bind(this, contract);
-};
-
-module.exports = SolidityEvent;
-
-
-},{"../solidity/coder":347,"../utils/sha3":359,"../utils/utils":360,"./filter":369,"./formatters":370,"./methods/watches":383}],368:[function(require,module,exports){
+arguments[4][309][0].apply(exports,arguments)
+},{"../solidity/coder":347,"../utils/sha3":359,"../utils/utils":360,"./filter":369,"./formatters":370,"./methods/watches":383,"dup":309}],368:[function(require,module,exports){
 arguments[4][310][0].apply(exports,arguments)
 },{"./../utils/utils":360,"./formatters":370,"./method":376,"./property":385,"dup":310}],369:[function(require,module,exports){
 arguments[4][311][0].apply(exports,arguments)
@@ -94277,7 +94062,7 @@ module.exports={
   "_args": [
     [
       "elliptic@6.5.4",
-      "/home/ed/working/monorepo/packages/reality-eth-lib"
+      "/var/www/html/monorepo-production/packages/reality-eth-lib"
     ]
   ],
   "_from": "elliptic@6.5.4",
@@ -94302,7 +94087,7 @@ module.exports={
   ],
   "_resolved": "https://registry.npmjs.org/elliptic/-/elliptic-6.5.4.tgz",
   "_spec": "6.5.4",
-  "_where": "/home/ed/working/monorepo/packages/reality-eth-lib",
+  "_where": "/var/www/html/monorepo-production/packages/reality-eth-lib",
   "author": {
     "name": "Fedor Indutny",
     "email": "fedor@indutny.com"
