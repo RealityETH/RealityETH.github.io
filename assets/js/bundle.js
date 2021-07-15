@@ -2182,6 +2182,17 @@ module.exports={
                 }
             }
         },
+        "FOX": {
+            "RealityETH_ERC20-2.0": {
+                "address": "0xf4585A9944A390615E7cec6756C1c082173B93eB",
+                "block": 12821080,
+                "token_address": "0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d",
+                "notes": null,
+                "arbitrators": {
+                    "0x90A48D5CF7343B08dA12E067680B4C6dbfE551Be": "ShapeShift DAO"
+                }
+            }
+        },
         "GNO": {
             "RealityETH_ERC20-2.0": {
                 "address": "0x8f1CC53bf34932591177CDA24723486205CA7510",
@@ -2376,6 +2387,13 @@ module.exports={
         "small_number": 1000000000000000000,
         "erc20_networks": {
             "4": "0x56AE5fd086823d1892BACE27034Eb5531Fcdc3f8"
+        }
+    },
+    "FOX": {
+        "decimals": 1000000000000000000,
+        "small_number": 1000000000000000000,
+        "erc20_networks": {
+            "1": "0xc770EEfAd204B5180dF6a14Ee197D99d808ee52d"
         }
     },
     "GNO": {
