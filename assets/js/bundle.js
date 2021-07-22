@@ -2045,6 +2045,22 @@ module.exports={
             "https://rinkeby.etherscan.io"
         ]
     },
+    "8": {
+        "chainId": "0x8",
+        "chainName": "Ubiq Network Mainnet",
+        "nativeCurrency": {
+            "name": "Ubiq Ether",
+            "symbol": "UBQ",
+            "decimals": 18
+        },
+        "network_name": "mainnet",
+        "rpcUrls": [
+            "https://rpc.octano.dev",
+            "https://pyrus2.ubiqscan.io"
+        ],
+        "hostedRPC": "https://rpc.octano.dev",
+        "blockExplorerUrls": []
+    },
     "42": {
         "chainId": "0x2a",
         "chainName": "Ethereum Testnet Kovan",
@@ -2164,6 +2180,42 @@ module.exports={
             "https://polygonscan.com",
             "https://polygonscan.com/"
         ]
+    },
+    "42161": {
+        "chainId": "0xa4b1",
+        "chainName": "Arbitrum One",
+        "nativeCurrency": {
+            "name": "Ether",
+            "symbol": "ETH",
+            "decimals": 18
+        },
+        "network_name": "arbitrum_tbd",
+        "rpcUrls": [
+            "https://arb1.arbitrum.io/rpc",
+            "wss://arb1.arbitrum.io/ws"
+        ],
+        "hostedRPC": "https://arb1.arbitrum.io/rpc",
+        "blockExplorerUrls": [
+            "https://explorer.arbitrum.io"
+        ]
+    },
+    "421611": {
+        "chainId": "0x66eeb",
+        "chainName": "Arbitrum Testnet Rinkeby",
+        "nativeCurrency": {
+            "name": "Arbitrum Rinkeby Ether",
+            "symbol": "ARETH",
+            "decimals": 18
+        },
+        "network_name": "arbitrum_testnet_tbd",
+        "rpcUrls": [
+            "https://rinkeby.arbitrum.io/rpc",
+            "wss://rinkeby.arbitrum.io/ws"
+        ],
+        "hostedRPC": "https://rinkeby.arbitrum.io/rpc",
+        "blockExplorerUrls": [
+            "https://rinkeby-explorer.arbitrum.io"
+        ]
     }
 }
 },{}],6:[function(require,module,exports){
@@ -2251,6 +2303,23 @@ module.exports={
                 "notes": null,
                 "arbitrators": {
                     "0x1184313B3690A4B4cF2436924C2d09dAC730628A": "Realitio Team (rinkeby main)"
+                }
+            }
+        }
+    },
+    "8": {
+        "UBIQ": {
+            "Arbitrator": {
+                "address": "0x9A43FC860c56eC158f77aC620fFac6080572A38D",
+                "block": 1621782,
+                "reality_eth_address": "0x0dE8A0B6d37FBfD704090245F517e52D7Ad9a903"
+            },
+            "RealityETH-2.1": {
+                "address": "0x0dE8A0B6d37FBfD704090245F517e52D7Ad9a903",
+                "block": 1621781,
+                "notes": null,
+                "arbitrators": {
+                    "0x9A43FC860c56eC158f77aC620fFac6080572A38D": "Reality.eth team (for testing)"
                 }
             }
         }
@@ -2347,10 +2416,52 @@ module.exports={
                 }
             }
         }
+    },
+    "42161": {
+        "ARETH": {
+            "Arbitrator": {
+                "address": "0xba1f68fC8283051C0BCeB8770673d5af14081731",
+                "block": 112029,
+                "reality_eth_address": "0x0EDB4CB0B12523749c56Ff24C4a09c0c1417f691"
+            },
+            "RealityETH-2.1": {
+                "address": "0x0EDB4CB0B12523749c56Ff24C4a09c0c1417f691",
+                "block": 112029,
+                "notes": null,
+                "arbitrators": {
+                    "0xba1f68fC8283051C0BCeB8770673d5af14081731": "Reality.eth Team"
+                }
+            }
+        }
+    },
+    "421611": {
+        "ARETH": {
+            "Arbitrator": {
+                "address": "0x0442820A55bA71b8e67e035CD10eAec3fFAa66b1",
+                "block": 838745,
+                "reality_eth_address": "0x592D5cdF8464E3a71C7d5e4C8A549a386B625534"
+            },
+            "RealityETH-2.1": {
+                "address": "0x592D5cdF8464E3a71C7d5e4C8A549a386B625534",
+                "block": 838745,
+                "notes": null,
+                "arbitrators": {
+                    "0x0442820A55bA71b8e67e035CD10eAec3fFAa66b1": "Reality.eth Team"
+                }
+            }
+        }
     }
 }
 },{}],7:[function(require,module,exports){
 module.exports={
+    "ARETH": {
+        "decimals": 1000000000000000000,
+        "small_number": 10000000000000000,
+        "native_networks": {
+            "42161": true,
+            "421611": true
+        }
+    },
     "BNB": {
         "decimals": 1000000000000000000,
         "small_number": 10000000000000000,
@@ -2372,6 +2483,13 @@ module.exports={
         "small_number": 1000000000000000000,
         "native_networks": {
             "137": true
+        }
+    },
+    "UBIQ": {
+        "decimals": 1000000000000000000,
+        "small_number": 1000000000000000000,
+        "native_networks": {
+            "8": true
         }
     },
     "XDAI": {
@@ -3849,7 +3967,7 @@ $(document).on('click', '#post-a-question-window .post-question-submit', functio
                     if (is_currency_native) {
                         rc.askQuestion.sendTransaction(template_id, qtext, arbitrator, timeout_val, opening_ts, 0, {
                             from: account,
-                            gas: 200000,
+                            //     gas: 200000,
                             value: reward.plus(fee)
                         }).then(function (txid) {
                             handleAskQuestionTX(txid);
@@ -4040,8 +4158,8 @@ $(document).on('click', '.answer-claim-button', function () {
 
         var gas = 140000 + 30000 * claim_args['history_hashes'].length;
         rc.claimMultipleAndWithdrawBalance.sendTransaction(claim_args['question_ids'], claim_args['answer_lengths'], claim_args['history_hashes'], claim_args['answerers'], claim_args['bonds'], claim_args['answers'], {
-            from: account,
-            gas: gas
+            from: account
+            // gas: gas
         }).then(function (txid) {
             //console.log('claiming is ',claiming);
             //console.log('claim result txid', txid);
@@ -6625,7 +6743,7 @@ $(document).on('click', '.post-answer-button', function (e) {
                 if (is_currency_native) {
                     rc.submitAnswer.sendTransaction(question_id, new_answer, current_question.bond, {
                         from: account,
-                        gas: 200000,
+                        //  gas: 200000,
                         value: bond
                     }).then(function (txid) {
                         handleAnswerSubmit(txid);
