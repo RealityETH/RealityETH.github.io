@@ -113,7 +113,7 @@ a.upper-button:hover {
 #site-header {
     width: 100%;
     display: inline-block;
-    height: 240px;
+    height: 250px;
     text-align: right;
 }
 
@@ -131,21 +131,29 @@ a.upper-button:hover {
 }
 
 #token-selection {
-    text-align:right;
-    text-align-last:right;
-    margin-left: 4px;
-    margin-bottom: 4px;
-    margin-top: 10px;
-    padding: 4px;
     font-weight: normal;
     display: inline-block;
-    margin-top: none;
     color: #939596;
 }
 
 #token-selection.uninitialized {
     visibility: hidden
 }
+
+#contract-selection {
+    text-align:right;
+    text-align-last:right;
+    font-weight: normal;
+    display: inline-block;
+    color: #939596;
+    float:right;
+}
+
+#contract-selection.uninitialized {
+    visibility: hidden
+}
+
+
 
 hr.upper-divider {
     height: 3px;
@@ -2793,7 +2801,7 @@ body.error-no-metamask-plugin div.error-bar div.error-label.no-metamask-plugin-i
 }
 
 .question-setting-info .balloon {
-    left: -360px !important;
+    left: -380px !important;
     text-align: left !important;
     right: initial;
 }
@@ -2856,6 +2864,7 @@ div.rcbrowser--qa-detail .rcbrowser-warning-header-failed-box div.pending-txid {
 
 div.question-setting-info .setting-info-content-hash { font-size: 10px; }
 div.question-setting-info .setting-info-question-id { font-size: 10px; }
+div.question-setting-info .setting-info-contract-address { font-size: 10px; }
 
 input.arbitrator-other {
     font-size:14px;
@@ -2944,7 +2953,7 @@ table.ui-datepicker-calendar {
 
 .spinner p {
     position: absolute;
-    width: 360px;
+    width: 380px;
     display: block;
     left: -140px;
     font-size: 14px;
@@ -3049,4 +3058,17 @@ span.add-network-button > a {
 }
 span.add-network-button > a:hover {
     text-decoration:none;
+}
+
+div.top-content-controls {
+    width:100%;
+    height:34px;
+}
+
+div.top-content-controls select {
+    padding:6px;
+}
+
+div.contract-claim-section-template {
+    display:none;
 }

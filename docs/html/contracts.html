@@ -38,7 +38,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Unavailability and null responses" href="availability.html" />
+    <link rel="next" title="Arbitrators" href="arbitrators.html" />
     <link rel="prev" title="Using the Reality.eth dapp" href="dapp.html" /> 
 </head>
 
@@ -105,14 +105,13 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#asking-questions">Asking questions</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#accepting-an-answer-only-if-something-has-happened">Accepting an answer only if something has happened</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accepting-an-answer-only-if-something-has-happened-pre-version-3">Accepting an answer only if something has happened (pre version 3)</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#accepting-an-answer-only-if-something-has-happened-version-3-onwards">Accepting an answer only if something has happened (version 3 onwards)</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#custom-templates">Custom templates</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#making-sure-a-question-has-an-answer">Making sure a question has an answer</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="availability.html">Unavailability and null responses</a></li>
 <li class="toctree-l1"><a class="reference internal" href="arbitrators.html">Arbitrators</a></li>
 <li class="toctree-l1"><a class="reference internal" href="fees.html">Fees and payments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whitepaper.html">White paper</a></li>
@@ -199,7 +198,7 @@
 <div class="highlight-javascript notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal">1</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="nx">bytes32</span> <span class="nx">response</span> <span class="o">=</span> <span class="nx">resultFor</span><span class="p">(</span><span class="nx">bytes32</span> <span class="nx">question_id</span><span class="p">);</span>
 </pre></div>
 </td></tr></table></div>
-<p>This will return <code class="docutils literal notranslate"><span class="pre">bytes32</span></code> data, or throw an error (<code class="docutils literal notranslate"><span class="pre">revert</span></code>) if the question does not exist or has not been finalized. You often want to cast the resulting <code class="docutils literal notranslate"><span class="pre">bytes32</span></code> to a <code class="docutils literal notranslate"><span class="pre">uint256</span></code> when you process it. By convention all supported types use <code class="docutils literal notranslate"><span class="pre">0xff...ff</span></code> to mean “invalid”. This will depend on the Question Type (see below).</p>
+<p>This will return <code class="docutils literal notranslate"><span class="pre">bytes32</span></code> data, or throw an error (<code class="docutils literal notranslate"><span class="pre">revert</span></code>) if the question does not exist or has not been finalized. You often want to cast the resulting <code class="docutils literal notranslate"><span class="pre">bytes32</span></code> to a <code class="docutils literal notranslate"><span class="pre">uint256</span></code> when you process it. By convention all supported types use <code class="docutils literal notranslate"><span class="pre">0xff...ff</span></code> (aka <code class="docutils literal notranslate"><span class="pre">bytes32(-1)</span></code>) to mean “invalid”.</p>
 </div>
 <div class="section" id="interpreting-the-result-of-a-question">
 <h3>Interpreting the result of a question<a class="headerlink" href="#interpreting-the-result-of-a-question" title="Permalink to this headline">¶</a></h3>
@@ -303,18 +302,41 @@
 </td></tr></table></div>
 <p>If the arbitrator you have selected charges a per-question fee, you must supply at least this much ETH. Any additonal ETH you send with this call will be assigned as a reward to whoever supplies the final answer to the question. See <a class="reference internal" href="fees.html"><span class="doc">Fees and payments</span></a> for more information.</p>
 <p>See <a class="reference internal" href="#templates"><span class="std std-ref">Templates</span></a> for the <code class="docutils literal notranslate"><span class="pre">template_id</span></code>, and how the <code class="docutils literal notranslate"><span class="pre">question</span></code> parameter is structured.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">arbitrator</span></code> is the address of the contract that will be able to arbitrate. See <a class="reference internal" href="arbitrators.html"><span class="doc">Arbitrators</span></a> for more information.</p>
+<p>If you are using a version of the contract that uses an ERC20 token, the same call will work but you cannot use it to supply funds. If you need to supply funds, either for an initial bond or because the arbitrator requires a per-question fee, you should instead call the ERC20 version, <code class="docutils literal notranslate"><span class="pre">askQuestionERC20()</span></code>. This has an additional parameter for the number of tokens you wish to supply. This will attempt to debit the tokens from the token contract, or <code class="docutils literal notranslate"><span class="pre">revert</span></code> if they have not been approved.</p>
+<div class="highlight-javascript notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
+<span class="normal"> 2</span>
+<span class="normal"> 3</span>
+<span class="normal"> 4</span>
+<span class="normal"> 5</span>
+<span class="normal"> 6</span>
+<span class="normal"> 7</span>
+<span class="normal"> 8</span>
+<span class="normal"> 9</span>
+<span class="normal">10</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span><span class="kd">function</span> <span class="nx">askQuestionERC20</span><span class="p">(</span>
+   <span class="nx">uint256</span> <span class="nx">template_id</span><span class="p">,</span>
+   <span class="nx">string</span> <span class="nx">question</span><span class="p">,</span>
+   <span class="nx">address</span> <span class="nx">arbitrator</span><span class="p">,</span>
+   <span class="nx">uint32</span> <span class="nx">timeout</span><span class="p">,</span>
+   <span class="nx">uint32</span> <span class="nx">opening_ts</span><span class="p">,</span>
+   <span class="nx">uint256</span> <span class="nx">nonce</span><span class="p">,</span>
+   <span class="nx">uint256</span> <span class="nx">tokens</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="nx">returns</span> <span class="p">(</span><span class="nx">bytes32</span> <span class="nx">question_id</span><span class="p">);</span>
+</pre></div>
+</td></tr></table></div>
+<p>The <code class="docutils literal notranslate"><span class="pre">arbitrator</span></code> is the address of the contract that will be able to arbitrate. See <a class="reference internal" href="arbitrators.html"><span class="doc">Arbitrators</span></a> for more information. From version 3, this parameter may be left empty. For prior versions, if you wish to make arbitration impossible, you can instead supply the address of the <cite>reality.eth</cite> contract itself.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is the time in seconds the question will have after adding an answer before it is automatically finalized. It would typically be around <code class="docutils literal notranslate"><span class="pre">1</span> <span class="pre">days</span></code>. The contract sanity-checks set the maximum possible value at <code class="docutils literal notranslate"><span class="pre">365</span> <span class="pre">days</span></code>.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">opening_ts</span></code> is the timestamp for the earliest time at which it will be possible to post an answer to the question. You can use <code class="docutils literal notranslate"><span class="pre">0</span></code> if you intend the question to be answerable immediately.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">nonce</span></code> is a user-supplied number that can be used to disambiguated deliberate repeated uses of the same question. You can use <code class="docutils literal notranslate"><span class="pre">0</span></code> if you never intend to ask the same question with the same settings twice.</p>
-<p>Any ETH provided with the <code class="docutils literal notranslate"><span class="pre">askQuestion</span></code> call will be used as a question reward, minus any fee the specified arbitrator requires when a new question is asked.</p>
-<p>The <code class="docutils literal notranslate"><span class="pre">askQuestion</span></code> call returns a <code class="docutils literal notranslate"><span class="pre">bytes32</span></code> ID. This ID is made by hashing the parameters, plus <code class="docutils literal notranslate"><span class="pre">msg.sender</span></code>.</p>
+<p>Any ETH or tokens provided with the <code class="docutils literal notranslate"><span class="pre">askQuestion</span></code> or <code class="docutils literal notranslate"><span class="pre">askQuestionERC20</span></code> call will be used as a question reward, minus any fee the specified arbitrator requires when a new question is asked.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">askQuestion</span></code> call returns a <code class="docutils literal notranslate"><span class="pre">bytes32</span></code> ID. This ID is made by hashing the parameters, plus <code class="docutils literal notranslate"><span class="pre">msg.sender</span></code>. Note that the format will change in version 3.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The Etherscan “write contract” feature has been known to mangle the delimiter character.</p>
 </div>
-<div class="section" id="accepting-an-answer-only-if-something-has-happened">
-<h3>Accepting an answer only if something has happened<a class="headerlink" href="#accepting-an-answer-only-if-something-has-happened" title="Permalink to this headline">¶</a></h3>
+<p>As of version 3, you can also specify a mimimum bond below which the initial answer will not be accepted. For this, use the <code class="docutils literal notranslate"><span class="pre">askQuestionWithMinBond()</span></code> or <code class="docutils literal notranslate"><span class="pre">askQuestionWithMinBondERC20()</span></code> method.</p>
+<div class="section" id="accepting-an-answer-only-if-something-has-happened-pre-version-3">
+<h3>Accepting an answer only if something has happened (pre version 3)<a class="headerlink" href="#accepting-an-answer-only-if-something-has-happened-pre-version-3" title="Permalink to this headline">¶</a></h3>
 <p>Once a question has been created and the opening date (if set) reached, it can be answered immediately.</p>
 <p>In many cases you are not interested in the result of a particular question until it has a particular answer. For example, if you have a contract insuring against my house burning down, you are only interested in the result if my house burned down. You don’t care about all the times in between setting up the policy and claiming when my house didn’t burn down.</p>
 <p>You may also want to screen out results indicating “unknown” or “no way to tell” or “hasn’t happened yet”.</p>
@@ -337,6 +359,11 @@
 </td></tr></table></div>
 <p>You can then screen <code class="docutils literal notranslate"><span class="pre">answer</span></code> in your contract and only act on results that your contract is interested in.</p>
 </div>
+<div class="section" id="accepting-an-answer-only-if-something-has-happened-version-3-onwards">
+<h3>Accepting an answer only if something has happened (version 3 onwards)<a class="headerlink" href="#accepting-an-answer-only-if-something-has-happened-version-3-onwards" title="Permalink to this headline">¶</a></h3>
+<p>To simplify the process of accepting only questions with an answer, from version 3 you can substitute <code class="docutils literal notranslate"><span class="pre">forResult()</span></code> with <code class="docutils literal notranslate"><span class="pre">forResultOnceSettled()</span></code>. This screens the result for an answer representing “not yet settled”, represented as <code class="docutils literal notranslate"><span class="pre">bytes32(-2)</span></code>. Rather than returning this answer, it will revert as it would if the question question had not yet been answered. The contract allows any user to reopen a question in this state, creating a new question, repeatedly if necessary. Once a replacement question has been settled, its result is returned using the ID of the original question. A calling contract can ignore the details of this process and know only that it needs to call <code class="docutils literal notranslate"><span class="pre">forResultOnceSettled()</span></code>.</p>
+<p>If using this feature it is also advisable to set a mimimum bond.</p>
+</div>
 </div>
 <div class="section" id="custom-templates">
 <span id="creating-templates"></span><h2>Custom templates<a class="headerlink" href="#custom-templates" title="Permalink to this headline">¶</a></h2>
@@ -356,12 +383,7 @@
 <dt>This can then by called with a string including only the flight number, the delimiter and the date, eg:</dt><dd><p><code class="docutils literal notranslate"><span class="pre">MH17␟2017-12-01</span></code></p>
 </dd>
 </dl>
-<p>A template can be created by calling <code class="docutils literal notranslate"><span class="pre">createTemplate(&quot;template&quot;)</span></code>, where “template” is the JSON template. This returns a numerical ID.</p>
-</div>
-<div class="section" id="making-sure-a-question-has-an-answer">
-<h2>Making sure a question has an answer<a class="headerlink" href="#making-sure-a-question-has-an-answer" title="Permalink to this headline">¶</a></h2>
-<p>As discussed in <a class="reference internal" href="availability.html"><span class="doc">Unavailability and null responses</span></a>, when a question is asked, the answer may be “don’t know” or “don’t understand” or “this isn’t settled yet”. Contracts relying on Reality.eth for information need to be designed to take account of this possibility.</p>
-<p>After settlement Reality.eth will preserve information about the <code class="docutils literal notranslate"><span class="pre">content_hash</span></code>, <code class="docutils literal notranslate"><span class="pre">arbitrator</span></code>, <code class="docutils literal notranslate"><span class="pre">timeout</span></code>, <code class="docutils literal notranslate"><span class="pre">finalization_ts</span></code> (finalization timestamp) and highest-posted <code class="docutils literal notranslate"><span class="pre">bond</span></code>. Contracts can either check this information directly or pass their requirements to <code class="docutils literal notranslate"><span class="pre">getFinalAnswerIfMatches()</span></code>.</p>
+<p>A template can be created by calling <code class="docutils literal notranslate"><span class="pre">createTemplate(&quot;template&quot;)</span></code>, where “template” is the JSON template. This returns a numerical ID. If you wish to reference particular template on code running on multiple networks with the same content, you may find it useful to call <code class="docutils literal notranslate"><span class="pre">template_hashes(bytes32</span> <span class="pre">template_hash)</span></code> to get the numerical ID.</p>
 </div>
 </div>
 
@@ -371,7 +393,7 @@
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="availability.html" class="btn btn-neutral float-right" title="Unavailability and null responses" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="arbitrators.html" class="btn btn-neutral float-right" title="Arbitrators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="dapp.html" class="btn btn-neutral float-left" title="Using the Reality.eth dapp" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

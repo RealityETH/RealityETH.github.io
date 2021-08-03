@@ -78,9 +78,24 @@
             <div id="site-introduction__buttons">
                 <a id="post-a-question-button" class="rcbrowser__open-button" data-target-id="id0" href="">Ask a Question</a>
             </div>
-            <select id="token-selection" name="token-selection" class="uninitialized">
-            </select>
         </header>
+
+            <div class="top-content-controls">
+                <select id="token-selection" name="token-selection" class="uninitialized">
+                </select>
+
+                <select id="contract-selection" name="contract-selection" class="uninitialized">
+                    <option class="all-contracts" value="">All contracts</option>
+                </select>
+
+                <!--
+                <form id="search-form" style="border:0px;">
+                    <input name="search-box" id="search-box" class="search-box" placeholder="" VALUE="">
+                </form>
+                -->
+            </div>
+
+
         <div id="questions-container" class="panel">
             <div class="questions-container-header">
                 <div class="nav-bar">
@@ -358,8 +373,10 @@
                 <div class="rcbrowser-main-header your-qa-header">
                     <h2 class="rcbrowser-main-header-title">Your Questions &amp; Answers</h2>
                     <div class="rcbrowser-main-header-subtitle"><a target="_blank" class="account-balance-link" href="#">Your Balance: <span class="account-balance"></span> <span class="token-ticker-text">ETH</span></a></div>
-                    <div class="answer-claim-button claim-all">Claim your <span class="claimable-eth"></span> <span class="token-ticker-text">ETH</span></div>
-                    <div class="answer-claiming-container claim-all">Claiming <span class="claimable-eth"></span> <span class="token-ticker-text">ETH</span> <a class="txid" target="_blank" href=""></a></div>
+                    <div class="contract-claim-section contract-claim-section-template">
+                        <div class="answer-claim-button claim-all">Claim your <span class="claimable-eth"></span> <span class="token-ticker-text">ETH</span></div>
+                        <div class="answer-claiming-container claim-all">Claiming <span class="claimable-eth"></span> <span class="token-ticker-text">ETH</span> <a class="txid" target="_blank" href=""></a></div>
+                    </div>
                 </div>
 
                 <div class="rcbrowser-main-body rcbrowser-main-body--your-qa">
@@ -890,13 +907,13 @@
             <span class="answer-prompt-text has-answer-only">Do you want to correct this answer?</span>
         </div>
 
-        <form name="" action="" method="post" class="rcbrowser-form" data-form-type="answer--single-select">
+        <form name="" action="" method="post" class="rcbrowser-form" data-form-type="answer--datetime">
             <div class="input-container input-container--answer">
                 <div class="input-inner">
                     <!--<span class="input-header">Enter the Answer:</span>-->
                     <input type="text" name="input-answer" class="rcbrowser-input rcbrowser-input--date--answer form-item form-item-value">
                 </div>
-                <div class="error-container">Please enter number.</div>
+                <div class="error-container">Please select a date.</div>
 
                     <div class="invalid-switch-container"><a class="invalid-text-link">Mark this question invalid</a><a class="valid-text-link">Mark this question valid</a></div>
             </div>
@@ -979,7 +996,8 @@
                             Arbitrator: <br /><span class="setting-info-arbitrator"></span><br /><br />
                             Created by: <br /><span class="setting-info-questioner"></span><br /><br />
                             Content hash: <br /><span class="setting-info-content-hash"></span><br /><br />
-                            Question ID: <br /><span class="setting-info-question-id"></span>
+                            Question ID: <br /><span class="setting-info-question-id"></span><br /><br />
+                            Contract: <br /><span class="setting-info-contract-address"></span>
                         </div>
                     </div>
 
