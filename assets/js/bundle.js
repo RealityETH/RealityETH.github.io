@@ -7481,9 +7481,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var ts_now = parseInt(new Date() / 1000);
         var contract_str = JSON.stringify(displayed_contracts);
         var ranking_where = {
-            'questions-active-answered': '{contract_in: ' + contract_str + ', answerFinalizedTimestamp_gt: ' + ts_now + ', openingTimestamp_lte: ' + ts_now + '}',
-            'questions-active-unanswered': '{contract_in: ' + contract_str + ', answerFinalizedTimestamp: null, openingTimestamp_lte: ' + ts_now + '}',
-            'questions-upcoming': '{contract_in: ' + contract_str + ', openingTimestamp_gt: ' + ts_now + '}',
+            'questions-active-answered': '{contract_in: ' + contract_str + ', arbitrationRequestedTimestamp: null, answerFinalizedTimestamp_gt: ' + ts_now + ', openingTimestamp_lte: ' + ts_now + '}',
+            'questions-active-unanswered': '{contract_in: ' + contract_str + ', arbitrationRequestedTimestamp: null, answerFinalizedTimestamp: null, openingTimestamp_lte: ' + ts_now + '}',
+            'questions-upcoming': '{contract_in: ' + contract_str + ', arbitrationRequestedTimestamp: null, openingTimestamp_gt: ' + ts_now + '}',
             'questions-resolved': '{contract_in: ' + contract_str + ', answerFinalizedTimestamp_lt: ' + ts_now + '}'
         };
 
@@ -7506,9 +7506,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         var query = '\n      {\n        questions(first: 10, where: ' + where + ', orderBy: ' + orderBy + ', orderDirection: desc) {\n            id,\n            questionId,\n            contract,\n            createdBlock\n        }\n      }  \n      ';
 
-        // console.log('query', query);
+        // console.log('sending graph query', ranking, query);
         var res = await axios.post(network_graph_url, { query: query });
-        //console.log('graph res', res.data);
+        // console.log('graph res', ranking, res.data);
         var _iteratorNormalCompletion2 = true;
         var _didIteratorError2 = false;
         var _iteratorError2 = undefined;
@@ -7517,7 +7517,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             for (var _iterator2 = res.data.data.questions[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
                 var q = _step2.value;
 
-                var question_posted = RCInstance(q.contract).filters.LogNewQuestion(q.question_id);
+                var question_posted = RCInstance(q.contract).filters.LogNewQuestion(q.questionId);
                 var _result2 = await RCInstance(q.contract).queryFilter(question_posted, parseInt(q.createdBlock), parseInt(q.createdBlock));
                 for (var i = 0; i < _result2.length; i++) {
                     handlePotentialUserAction(_result2[i], false);
