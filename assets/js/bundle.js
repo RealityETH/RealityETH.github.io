@@ -2321,10 +2321,10 @@ module.exports={
         }
     },
     "8": {
-        "UBIQ": {
+        "UBQ": {
             "Arbitrator": {
-                "address": "0x9A43FC860c56eC158f77aC620fFac6080572A38D",
-                "block": 1621782,
+                "address": "0xD31566493ac99fCa63BF17E62724b41010b4AFB6",
+                "block": 1635513,
                 "reality_eth_address": "0x0dE8A0B6d37FBfD704090245F517e52D7Ad9a903"
             },
             "RealityETH-2.1": {
@@ -2332,7 +2332,7 @@ module.exports={
                 "block": 1621781,
                 "notes": null,
                 "arbitrators": {
-                    "0x9A43FC860c56eC158f77aC620fFac6080572A38D": "Reality.eth team (for testing)"
+                    "0xD31566493ac99fCa63BF17E62724b41010b4AFB6": "Ubiq Core Dev Team"
                 }
             }
         }
@@ -2507,6 +2507,13 @@ module.exports={
             "137": true
         }
     },
+    "UBQ": {
+        "decimals": 1000000000000000000,
+        "small_number": 1000000000000000000,
+        "native_chains": {
+            "8": true
+        }
+    },
     "XDAI": {
         "decimals": 1000000000000000000,
         "small_number": 1000000000000000000,
@@ -2549,13 +2556,6 @@ module.exports={
         "erc20_chains": {
             "1": "0xcb94be6f13a1182e4a4b6140cb7bf2025d28e41b",
             "4": "0x21036C54e16521B8809553956123E44054120226"
-        }
-    },
-    "UBIQ": {
-        "decimals": 1000000000000000000,
-        "small_number": 1000000000000000000,
-        "native_networks": {
-            "8": true
         }
     }
 }
