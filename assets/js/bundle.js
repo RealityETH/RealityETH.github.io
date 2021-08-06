@@ -2059,7 +2059,9 @@ module.exports={
             "https://pyrus2.ubiqscan.io"
         ],
         "hostedRPC": "https://rpc.octano.dev",
-        "blockExplorerUrls": []
+        "blockExplorerUrls": [
+            "https://ubqblockexplorer.com/"
+        ]
     },
     "42": {
         "chainId": "0x2a",
@@ -4846,11 +4848,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             return QUESTION_DETAIL_CACHE[contract_question_id];
         } else {
             // console.log('_ensureQuestionDataFetched fetch fresh', contract_question_id, freshness, QUESTION_DETAIL_CACHE[contract_question_id]);
-            var _result = await RCInstance(contract).functions.questions(question_id);
-            if (ethers.BigNumber.from(_result[Qi_content_hash]).eq(0)) {
+            var result = await RCInstance(contract).functions.questions(question_id);
+            if (ethers.BigNumber.from(result[Qi_content_hash]).eq(0)) {
                 throw new Error("question not found in call, maybe try again later", question_id);
             }
-            var q = await filledQuestionDetail(contract, question_id, 'question_call', called_block, _result);
+            var q = await filledQuestionDetail(contract, question_id, 'question_call', called_block, result);
             return q;
             /*
             rc.questions.call(question_id).then(function(result) {
@@ -5329,7 +5331,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         var is_finalized = isFinalized(question);
-        var is_before_opening = isQuestionBeforeOpeningDate(question);
+
+        // Pending arbitration doesn't exactly fit but it fits better than the other categories
+        var is_before_opening = isQuestionBeforeOpeningDate(question) || isArbitrationPending(question);
         var bounty = question.bounty;
         var opening_ts = question.opening_ts;
 
@@ -7097,7 +7101,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             //console.log('got fee', arbitration_fee.toString());
 
             var signed_arbitrator = arb.connect(signer);
-            signed_arbitrator.requestArbitration(question_id, ethers.BigNumber.from(last_seen_bond_hex, 16), { from: ACCOUNT, value: arbitration_fee }).then(function () {
+            signed_arbitrator.requestArbitration(question_id, ethers.BigNumber.from(last_seen_bond_hex, 16), { from: ACCOUNT, value: arbitration_fee }).then(function (result) {
                 console.log('arbitration is requested.', result);
             });
         }).catch(function (err) {
@@ -7442,6 +7446,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         fetchAndDisplayQuestionFromGraph(RC_DISPLAYED_CONTRACTS, 'questions-active-unanswered');
         fetchAndDisplayQuestionFromGraph(RC_DISPLAYED_CONTRACTS, 'questions-upcoming');
         fetchAndDisplayQuestionFromGraph(RC_DISPLAYED_CONTRACTS, 'questions-resolved');
+        fetchAndDisplayQuestionFromGraph(RC_DISPLAYED_CONTRACTS, 'questions-awaiting-arbitration');
 
         // Now the rest of the questions
         LAST_POLLED_BLOCK = CURRENT_BLOCK_NUMBER;
@@ -7481,17 +7486,19 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var ts_now = parseInt(new Date() / 1000);
         var contract_str = JSON.stringify(displayed_contracts);
         var ranking_where = {
-            'questions-active-answered': '{contract_in: ' + contract_str + ', arbitrationRequestedTimestamp: null, answerFinalizedTimestamp_gt: ' + ts_now + ', openingTimestamp_lte: ' + ts_now + '}',
-            'questions-active-unanswered': '{contract_in: ' + contract_str + ', arbitrationRequestedTimestamp: null, answerFinalizedTimestamp: null, openingTimestamp_lte: ' + ts_now + '}',
-            'questions-upcoming': '{contract_in: ' + contract_str + ', arbitrationRequestedTimestamp: null, openingTimestamp_gt: ' + ts_now + '}',
-            'questions-resolved': '{contract_in: ' + contract_str + ', answerFinalizedTimestamp_lt: ' + ts_now + '}'
+            'questions-active-answered': '{contract_in: ' + contract_str + ', isPendingArbitration: false, answerFinalizedTimestamp_gt: ' + ts_now + ', openingTimestamp_lte: ' + ts_now + '}',
+            'questions-active-unanswered': '{contract_in: ' + contract_str + ', isPendingArbitration: false, answerFinalizedTimestamp: null, openingTimestamp_lte: ' + ts_now + '}',
+            'questions-upcoming': '{contract_in: ' + contract_str + ', isPendingArbitration: false, openingTimestamp_gt: ' + ts_now + '}',
+            'questions-resolved': '{contract_in: ' + contract_str + ', answerFinalizedTimestamp_lt: ' + ts_now + '}',
+            'questions-awaiting-arbitration': '{contract_in: ' + contract_str + ', isPendingArbitration: true}'
         };
 
         var ranking_order = {
             'questions-active-answered': 'lastBond',
             'questions-active-unanswered': 'createdTimestamp',
             'questions-upcoming': 'createdTimestamp',
-            'questions-resolved': 'answerFinalizedTimestamp'
+            'questions-resolved': 'answerFinalizedTimestamp',
+            'questions-awaiting-arbitration': 'lastBond'
         };
 
         var where = ranking_where[ranking];
@@ -7518,10 +7525,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 var q = _step2.value;
 
                 var question_posted = RCInstance(q.contract).filters.LogNewQuestion(q.questionId);
-                var _result2 = await RCInstance(q.contract).queryFilter(question_posted, parseInt(q.createdBlock), parseInt(q.createdBlock));
-                for (var i = 0; i < _result2.length; i++) {
-                    handlePotentialUserAction(_result2[i], false);
-                    handleQuestionLog(_result2[i]);
+                var result = await RCInstance(q.contract).queryFilter(question_posted, parseInt(q.createdBlock), parseInt(q.createdBlock));
+                for (var i = 0; i < result.length; i++) {
+                    handlePotentialUserAction(result[i], false);
+                    handleQuestionLog(result[i]);
                 }
             }
         } catch (err) {
