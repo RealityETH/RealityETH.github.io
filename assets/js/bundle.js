@@ -3610,10 +3610,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var sel_cont = $(this).closest('.select-container');
         if (/^(0x)?[0-9a-f]{1,40}$/i.test(arb_text)) {
             var ar = ARBITRATOR_INSTANCE.attach(arb_text);
-            ar.functions.realitio.then(function (rcaddr_arr) {
+            ar.functions.realitio().then(function (rcaddr_arr) {
                 var rcaddr = rcaddr_arr[0];
                 if (rcaddr != RCInstance(RC_DEFAULT_ADDRESS).address) {
-                    console.log('reality check mismatch');
+                    console.log('reality check mismatch', rcaddr, RCInstance(RC_DEFAULT_ADDRESS).address);
                     return;
                 }
                 RCInstance(RC_DEFAULT_ADDRESS).functions.arbitrator_question_fees(arb_text).then(function (fee_arr) {
@@ -7844,11 +7844,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     }
 
     async function validateArbitratorForContract(contract, arb_addr) {
-        if (ARBITRATOR_VERIFIED_BY_CONTRACT[contract.toLowerCase()][arb_addr.toLowerCase()]) {
+        if (ARBITRATOR_VERIFIED_BY_CONTRACT[contract.toLowerCase()] && ARBITRATOR_VERIFIED_BY_CONTRACT[contract.toLowerCase()][arb_addr.toLowerCase()]) {
             return true;
         }
         var ar = ARBITRATOR_INSTANCE.attach(arb_addr);
-        var rslt = ar.functions.realitio();
+        var rslt_arr = await ar.functions.realitio();
+        var rslt = rslt_arr[0];
         return RCInstance(RC_DEFAULT_ADDRESS).address.toLowerCase() == rslt.toLowerCase();
     }
 
