@@ -103,6 +103,7 @@
 <li class="toctree-l1"><a class="reference internal" href="fees.html">Fees and payments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whitepaper.html">White paper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contract_explanation.html">Contract Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dapp_links.html">Linking to the Reality.eth dapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="audit.html">Audit</a></li>
 </ul>
 
@@ -222,10 +223,11 @@
 <h2>Getting information about the arbitrator<a class="headerlink" href="#getting-information-about-the-arbitrator" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">function</span> <span class="pre">realitio()</span></code> should provide the address of the Reality.eth contract to which the arbitrator responds.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">function</span> <span class="pre">metadata()</span></code> should provide a string of json-encoded metadata. The following properties are scheduled for implementation in the Reality.eth dapp:</p>
+<li><p><code class="docutils literal notranslate"><span class="pre">function</span> <span class="pre">metadata()</span></code> should provide a string of json-encoded metadata. It may contain the following properties</p>
 <ul>
-<li><p><code class="docutils literal notranslate"><span class="pre">tos</span></code>: A URI representing the location of a terms-of-service document for the arbitrator.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">template_hashes</span></code>: An array of hashes of templates supported by the arbitrator. If you have a numerical ID for a template registered with Reality.eth, you can look up this hash by calling the Reality.eth <code class="docutils literal notranslate"><span class="pre">template_hashes()</span></code> function.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tos</span></code>: A URI representing the location of a terms-of-service document for the arbitrator. Should be a URI, either a standard <a class="reference external" href="https://">https://</a> URL or ipfs://</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">foreignProxy:</span> <span class="pre">true</span></code>: This signals that the contract requires users to request arbitration on another chain, as with the Kleros cross-chain proxy. The contract will call additional methods against the contract to get the details of the foreign proxy.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">template_hashes</span></code>: [Not yet implemented] An array of hashes of templates supported by the arbitrator, if you want to limit usage of the arbitrator to specified templates. If you have a numerical ID for a template registered with Reality.eth, you can look up this hash by calling the Reality.eth <code class="docutils literal notranslate"><span class="pre">template_hashes()</span></code> function.</p></li>
 </ul>
 </li>
 </ul>
