@@ -3296,10 +3296,10 @@ module.exports=  [
 
 },{}],10:[function(require,module,exports){
 module.exports={
-        "0xdcdede29a2b83176ab478dc0f9b08b7c01ac5f58": "https://www.socialminds.jp/arbitration_tos.html",
-        "0x3b3b6cab7df3ae78e5dd042f99f1efe8679c8a00": "https://www.socialminds.jp/arbitration_tos.html",
-        "0x67a87899d890aa31308d97d7f5b6885b9336932d": "https://www.socialminds.jp/arbitration_tos.html",
-        "0xeccb1d756cd1d6a452c1f70bd2709413b85173c1": "https://www.socialminds.jp/arbitration_tos.html"
+        "0xdcdede29a2b83176ab478dc0f9b08b7c01ac5f58": { "tos": "https://www.socialminds.jp/arbitration_tos.html" },
+        "0x3b3b6cab7df3ae78e5dd042f99f1efe8679c8a00": { "tos": "https://www.socialminds.jp/arbitration_tos.html" },
+        "0x67a87899d890aa31308d97d7f5b6885b9336932d": { "tos": "https://www.socialminds.jp/arbitration_tos.html" },
+        "0xeccb1d756cd1d6a452c1f70bd2709413b85173c1": { "tos": "https://www.socialminds.jp/arbitration_tos.html" }
 }
 
 },{}],11:[function(require,module,exports){
@@ -3350,14 +3350,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     var IS_TOKEN_NATIVE = false;
     var IS_WEB3_FALLBACK = false;
 
-    // For now we have a json file hard-coding the TOS of known arbitrators.
-    // See https://github.com/realitio/realitio-dapp/issues/136 for the proper way to do it.
-    var ARB_TOS = require('./arbitrator_tos.json');
-
     var ARBITRATOR_LIST_BY_CONTRACT = {};
     var ARBITRATOR_VERIFIED_BY_CONTRACT = {};
     var ARBITRATOR_FAILED_BY_CONTRACT = {};
     var FOREIGN_PROXY_DATA = {};
+    var ARBITRATOR_METADATA = require('./arbitrator_metadata_legacy.json'); // Old contracts don't have this so hard-code it
 
     var TEMPLATE_CONFIG = rc_contracts.templateConfig();
     var QUESTION_TYPE_TEMPLATES = TEMPLATE_CONFIG.base_ids;
@@ -3471,6 +3468,20 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     var ZINDEX = 10;
 
     var MONTH_LIST = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'June', 'July', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+
+    function formatPossibleIPFSLink(u) {
+        if (!u) {
+            return '';
+        }
+        console.log('consider ink', u);
+        if (u.toLowerCase().substr(0, 7) == 'ipfs://') {
+            console.log('replaceint', u);
+            u = u.replace('ipfs://', 'https://ipfs.io/ipfs/');
+        } else {
+            console.log('not ipfs', u);
+        }
+        return u;
+    }
 
     function markArbitratorFailed(contract, addr, contract_question_id) {
         ARBITRATOR_FAILED_BY_CONTRACT[contract.toLowerCase()][addr.toLowerCase()] = true;
@@ -3610,17 +3621,31 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var sel_cont = $(this).closest('.select-container');
         if (/^(0x)?[0-9a-f]{1,40}$/i.test(arb_text)) {
             var ar = ARBITRATOR_INSTANCE.attach(arb_text);
-            ar.functions.realitio().then(function (rcaddr_arr) {
+            ar.functions.realitio().then(async function (rcaddr_arr) {
                 var rcaddr = rcaddr_arr[0];
                 if (rcaddr != RCInstance(RC_DEFAULT_ADDRESS).address) {
                     console.log('reality check mismatch', rcaddr, RCInstance(RC_DEFAULT_ADDRESS).address);
                     return;
                 }
+
+                var metadata = await loadArbitratorMetaData(arb_text);
+                var tos = 'tos' in metadata ? metadata['tos'] : null;
+                var tos_section = sel_cont.closest('.select-container').find('div.arbitrator-tos');
+                if (tos) {
+                    console.log('got tos, showing', tos);
+                    tos_section.find('.arbitrator-tos-link').attr('href', formatPossibleIPFSLink(tos));
+                    tos_section.show();
+                } else {
+                    console.log('no tos, hiding', tos);
+                    tos_section.find('.arbitrator-tos-link').attr('href', '');
+                    tos_section.hide();
+                }
+
                 RCInstance(RC_DEFAULT_ADDRESS).functions.arbitrator_question_fees(arb_text).then(function (fee_arr) {
                     var fee = fee_arr[0];
-                    populateArbitratorOptionLabel(sel_cont.find('option.arbitrator-other-select'), fee);
+                    populateArbitratorOptionLabel(sel_cont.find('option.arbitrator-other-select'), fee, null, tos);
                 }).catch(function () {
-                    populateArbitratorOptionLabel(sel_cont.find('option.arbitrator-other-select'), ethers.BigNumber.from(0));
+                    populateArbitratorOptionLabel(sel_cont.find('option.arbitrator-other-select'), ethers.BigNumber.from(0), null, tos);
                 });
             }).catch(function (err) {
                 markArbitratorFailed(RC_DEFAULT_ADDRESS, arb_text);
@@ -4853,6 +4878,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 throw new Error("question not found in call, maybe try again later", question_id);
             }
             var q = await filledQuestionDetail(contract, question_id, 'question_call', called_block, result);
+            await loadArbitratorMetaData(q.arbitrator); // We keep a separate cache from this, it should usually already be in there
             return q;
             /*
             rc.questions.call(question_id).then(function(result) {
@@ -5678,18 +5704,41 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         return cat_txt;
     }
 
+    // Returns arbitration metadata from the cache
+    // Assumes it's already been loaded
+    function arbitrationMetaDataFromCache(arb_addr) {
+        if (arb_addr.toLowerCase() in ARBITRATOR_METADATA) {
+            //console.log('found metadata for', arb_addr);
+            return ARBITRATOR_METADATA[arb_addr.toLowerCase()];
+        }
+        if (arb_addr.toLowerCase() == '0x0000000000000000000000000000000000000000') {
+            return {};
+        }
+        //console.log('no metadata for', arb_addr, ARBITRATOR_METADATA);
+        return null;
+    }
+
     async function loadArbitratorMetaData(arb_addr) {
-        console.log('getting metadata for arbitrator', arb_addr);
-        var arb = ARBITRATOR_INSTANCE.attach(arb_addr);
-        var md_arr = await arb.functions.metadata();
-        var md = md_arr[0];
-        console.log('md response', md_arr);
+        var cached_md = arbitrationMetaDataFromCache(arb_addr);
+        if (cached_md) {
+            return cached_md;
+        }
+        //console.log('fetching metadata for arbitrator', arb_addr);
         var metadata_json = {};
         try {
-            metadata_json = JSON.parse(md);
+            var arb = ARBITRATOR_INSTANCE.attach(arb_addr);
+            var md_arr = await arb.functions.metadata();
+            var md = md_arr[0];
+            try {
+                metadata_json = JSON.parse(md);
+            } catch (e) {
+                console.log('metadata_json could not be parsed', md);
+            }
         } catch (e) {
-            console.log('metadata_json could not be parsed', md);
+            console.log('Got an error trying to fetch arbitrator metadata, this is normal with some arbitrators', arb_addr);
         }
+        ARBITRATOR_METADATA[arb_addr.toLowerCase()] = metadata_json;
+        // console.log('loaded metadata', arb_addr, metadata_json);
         return metadata_json;
     }
 
@@ -5718,6 +5767,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
         if (question_detail.block_mined > 0) {
             rcqa.removeClass('unconfirmed-transaction').removeClass('has-warnings');
+        }
+
+        var metadata = arbitrationMetaDataFromCache(question_detail.arbitrator);
+        if (metadata && 'tos' in metadata && metadata['tos']) {
+            rcqa.find('.arbitrator-tos-link').attr('href', formatPossibleIPFSLink(metadata['tos'])).removeClass('unpopulated');
+        } else {
+            rcqa.find('.arbitrator-tos-link').attr('href', '').addClass('unpopulated');
         }
 
         var bond = ethers.BigNumber.from("" + TOKEN_INFO[TOKEN_TICKER]['small_number']).div(2);
@@ -7762,7 +7818,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         op.text(txt);
         op.attr('data-question-fee', fee.toHexString());
         if (tos) {
-            op.attr('data-tos-url', tos);
+            op.attr('data-tos-url', formatPossibleIPFSLink(tos));
         }
     }
 
@@ -7800,14 +7856,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     return is_arb_valid;
                 }).then(function (is_arb_valid) {
                     if (is_arb_valid) {
-                        RCInstance(RC_DEFAULT_ADDRESS).functions.arbitrator_question_fees(na_addr).then(function (fee_call_response) {
+                        RCInstance(RC_DEFAULT_ADDRESS).functions.arbitrator_question_fees(na_addr).then(async function (fee_call_response) {
                             var fee = fee_call_response[0];
+                            var metadata = await loadArbitratorMetaData(na_addr);
+                            var tos = 'tos' in metadata ? metadata['tos'] : null;
                             var arb_item = a_template.clone().removeClass('arbitrator-template-item').addClass('arbitrator-option');
                             arb_item.val(na_addr);
-                            var tos = null;
-                            if (ARB_TOS[na_addr]) {
-                                tos = ARB_TOS[na_addr];
-                            }
                             populateArbitratorOptionLabel(arb_item, fee, na_title, tos);
                             if (is_first) {
                                 arb_item.attr('selected', true);
@@ -8346,7 +8400,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     }
 })();
 
-},{"../../abi/ProxiedArbitrator.json":9,"./arbitrator_tos.json":10,"@reality.eth/contracts":8,"@reality.eth/reality-eth-lib/formatters/question.js":408,"@reality.eth/reality-eth-lib/formatters/template.js":409,"axios":193,"bignumber.js":222,"crypto":271,"ethers":300,"interactjs":321,"jazzicon":325,"jquery-browserify":327,"jquery-datepicker":328,"jquery-expander":329,"perfect-scrollbar":346,"timeago.js":404}],12:[function(require,module,exports){
+},{"../../abi/ProxiedArbitrator.json":9,"./arbitrator_metadata_legacy.json":10,"@reality.eth/contracts":8,"@reality.eth/reality-eth-lib/formatters/question.js":408,"@reality.eth/reality-eth-lib/formatters/template.js":409,"axios":193,"bignumber.js":222,"crypto":271,"ethers":300,"interactjs":321,"jazzicon":325,"jquery-browserify":327,"jquery-datepicker":328,"jquery-expander":329,"perfect-scrollbar":346,"timeago.js":404}],12:[function(require,module,exports){
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.version = void 0;
