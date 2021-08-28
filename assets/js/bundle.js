@@ -6005,11 +6005,11 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                         window.open(proxy_url);
                     });
                     btn.removeClass('unpopulated').attr('data-foreign-proxy', foreign_proxy).attr('data-foreign-chain-id', foreign_chain_id);
+                } else {
+                    // If it doesn't implement foreign proxy either, it's a contract or address without the proper interface.
+                    // console.log('arbitrator failed with error', err);
+                    markArbitratorFailed(question_detail.contract, question_detail.arbitrator, contractQuestionID(question_detail));
                 }
-            }).catch(function (err) {
-                // If it doesn't implement foreign proxy either, it's a contract without the proper interface.
-                console.log('arbitrator failed with error', err);
-                markArbitratorFailed(question_detail.contract, question_detail.arbitrator, contractQuestionID(question_detail));
             });
         }
 
