@@ -6,7 +6,7 @@ import Ps from 'perfect-scrollbar';
 (function() {
 
 const ethers = require("ethers");
-const BigNumber = require('bignumber.js');
+const semver = require("semver");
 const timeago = require('timeago.js');
 const timeAgo = new timeago();
 const jazzicon = require('jazzicon');
@@ -80,10 +80,7 @@ const Qi_bounty = 6;
 const Qi_best_answer = 7;
 const Qi_history_hash = 8;
 const Qi_bond = 9;
-
-BigNumber.config({
-    RABGE: 256
-});
+const Qi_min_bond = 10; // v3 or above only
 
 let BLOCK_TIMESTAMP_CACHE = {};
 
@@ -92,6 +89,7 @@ let Q_MIN_ACTIVITY_BLOCKS = {};
 
 // These will be populated in onload, once the provider is loaded
 let RC_INSTANCES = {};
+let RC_INSTANCE_VERSIONS = {};
 let RC_DEFAULT_ADDRESS = null;
 let RC_DISPLAYED_CONTRACTS = [];
 
@@ -315,6 +313,19 @@ function RCInstance(ctr, signed) {
     return ret;
 }
 
+function populateTOSSection(container, tos) {
+
+    const tos_section = container.find('div.arbitrator-tos');
+    if (tos) {
+        tos_section.find('.arbitrator-tos-link').attr('href', formatPossibleIPFSLink(tos));
+        container.addClass('has-arbitrator-tos');
+    } else {
+        tos_section.find('.arbitrator-tos-link').attr('href', '');
+        container.removeClass('has-arbitrator-tos');
+    }
+
+}
+
 $(document).on('change', 'input.arbitrator-other', function() {
     const arb_text = $(this).val();
     const sel_cont = $(this).closest('.select-container');
@@ -329,16 +340,8 @@ $(document).on('change', 'input.arbitrator-other', function() {
 
             const metadata = await loadArbitratorMetaData(arb_text);
             const tos = ('tos' in metadata) ? metadata['tos'] : null;
-            const tos_section = sel_cont.closest('.select-container').find('div.arbitrator-tos');
-            if (tos) {
-console.log('got tos, showing', tos);
-                tos_section.find('.arbitrator-tos-link').attr('href', formatPossibleIPFSLink(tos));
-                tos_section.show(); 
-            } else {
-console.log('no tos, hiding', tos);
-                tos_section.find('.arbitrator-tos-link').attr('href', '');
-                tos_section.hide(); 
-            }
+
+            populateTOSSection(sel_cont, tos);
 
             RCInstance(RC_DEFAULT_ADDRESS).functions.arbitrator_question_fees(arb_text).then(function(fee_arr) {
                 const fee = fee_arr[0];
@@ -367,14 +370,8 @@ $(document).on('change', 'select.arbitrator', function() {
     const op = $(this).find('option:selected');
     const tos_url = op.attr('data-tos-url');
     console.log('tos_url', tos_url, 'op', op);
-    const tos_section = $(this).closest('.select-container').find('div.arbitrator-tos');
-    if (tos_url) {
-        tos_section.find('.arbitrator-tos-link').attr('href', tos_url);
-        tos_section.show(); 
-    } else {
-        tos_section.find('.arbitrator-tos-link').attr('href', '');
-        tos_section.hide(); 
-    }
+
+    populateTOSSection($(this).closest('.select-container'), tos_url);
 });
 
 $(document).on('click', '.rcbrowser', function() {
@@ -441,39 +438,22 @@ function markViewedToDate() {
 }
 
 function humanToDecimalizedBigNumber(num, force_eth) {
-    const decimalstr = force_eth ? ""+1000000000000000000 : ""+TOKEN_INFO[TOKEN_TICKER]['decimals'];
-    const num_trad_bn = new BigNumber(num).times(decimalstr);
-    const num_hex_str = '0x'+num_trad_bn.toString(16);
-    return ethers.BigNumber.from(num_hex_str);
+    const decimalstr = force_eth ? "1000000000000000000" : ""+TOKEN_INFO[TOKEN_TICKER]['decimals'];
+    const decimals = (decimalstr.match(/0/g) || []).length;
+    return ethers.utils.parseUnits(num, decimals);
 }
 
 function decimalizedBigNumberToHuman(num, force_eth) {
-    // For formatting for humans we use a traditional BigNumber not the ethers version
-    // TODO See if we can get the ethers version to format decimals nicely
-    const decs = force_eth ? 1000000000000000000 : TOKEN_INFO[TOKEN_TICKER]['decimals'];
-    const num_trad_bn = new BigNumber(num.toHexString());
-    return num_trad_bn.div(decs).toString();
+    // TODO: Change the token list to use a number like 18
+    const decimalstr = force_eth ? "1000000000000000000" : ""+TOKEN_INFO[TOKEN_TICKER]['decimals'];
+    const decimals = (decimalstr.match(/0/g) || []).length;
+    // console.log('decimals are', decimals);
+    return ethers.utils.formatUnits(num, decimals).replace(/\.0+$/,'');
 }
 
 function humanReadableWei(amt) {
-    amt = new BigNumber(amt.toHexString());
-    let unit = null;
-    let displ = null;
-    let div = 1;
-    const maxeth = new BigNumber(10).pow(16)
-    if (amt.gt(maxeth)) {
-        unit = 'ETH';
-        div = new BigNumber(10).pow(18);
-    } else if (amt.gt(new BigNumber(10).pow(7))) {
-        unit = 'Gwei';
-        div = new BigNumber(10).pow(9);
-    } else {
-        unit = 'Wei';
-    }
-    const amt_txt = amt.div(div).toString();
-    return amt_txt + ' ' + unit;
+    return decimalizedBigNumberToHuman(amt, true) + ' ETH';
 }
-
 
 $('#help-center-window .rcbrowser__close-button').on('click', function(e) {
     e.preventDefault();
@@ -655,7 +635,15 @@ $(document).on('click', '#post-a-question-window .post-question-submit', async f
         opening_ts = parseInt(opening_ts / 1000);
     }
 
-    const question_id = rc_question.questionID(template_id, qtext, arbitrator, timeout_val, opening_ts, ACCOUNT, 0);
+    const rcver = RC_INSTANCE_VERSIONS[RC_DEFAULT_ADDRESS.toLowerCase()];
+
+    let min_bond = ethers.BigNumber.from(0);
+    if (win.hasClass('version-supports-min-bond')) {
+        const min_bond_val = win.find('.question-min-bond').val();
+        min_bond = humanToDecimalizedBigNumber(min_bond_val);
+    }
+
+    const question_id = rc_question.questionID(template_id, qtext, arbitrator, timeout_val, opening_ts, ACCOUNT, 0, min_bond.toHexString(), RC_DEFAULT_ADDRESS, rcver);
     //console.log('question_id inputs for id ', question_id, template_id, qtext, arbitrator, timeout_val, opening_ts, ACCOUNT, 0);
     //console.log('content_hash inputs for content hash ', rc_question.contentHash(template_id, opening_ts, qtext), template_id, opening_ts, qtext);
 
@@ -706,6 +694,7 @@ $(document).on('click', '#post-a-question-window .post-question-submit', async f
         fake_call[Qi_bounty] = reward;
         fake_call[Qi_best_answer] = "0x0000000000000000000000000000000000000000000000000000000000000000";
         fake_call[Qi_bond] = ethers.BigNumber.from(0);
+        fake_call[Qi_min_bond] = min_bond;
         fake_call[Qi_history_hash] = "0x0000000000000000000000000000000000000000000000000000000000000000";
         fake_call[Qi_opening_ts] = ethers.BigNumber.from(opening_ts);
 
@@ -757,18 +746,33 @@ $(document).on('click', '#post-a-question-window .post-question-submit', async f
     const signedRC = RCInstance(RC_DEFAULT_ADDRESS, true);
     let tx_response = null;
     if (IS_TOKEN_NATIVE) { 
-        tx_response = await signedRC.functions.askQuestion(template_id, qtext, arbitrator, timeout_val, opening_ts, 0, {
-            from: ACCOUNT,
-            // gas: 200000,
-            value: reward.add(fee)
-        });
+        if (min_bond.gt(0)) {
+            tx_response = await signedRC.functions.askQuestionWithMinBond(template_id, qtext, arbitrator, timeout_val, opening_ts, 0, min_bond, {
+                from: ACCOUNT,
+                // gas: 200000,
+                value: reward.add(fee)
+            });
+        } else {
+            tx_response = await signedRC.functions.askQuestion(template_id, qtext, arbitrator, timeout_val, opening_ts, 0, {
+                from: ACCOUNT,
+                // gas: 200000,
+                value: reward.add(fee)
+            });
+        }
     } else {
         const cost = reward.add(fee);
         await ensureAmountApproved(RCInstance(RC_DEFAULT_ADDRESS).address, ACCOUNT, cost);
-        tx_response = await signedRC.functions.askQuestionERC20(template_id, qtext, arbitrator, timeout_val, opening_ts, 0, cost, {
-            from: ACCOUNT,
-            // gas: 200000,
-        })
+        if (min_bond.gt(0)) {
+            tx_response = await signedRC.functions.askQuestionWithMinBondERC20(template_id, qtext, arbitrator, timeout_val, opening_ts, 0, min_bond, cost, {
+                from: ACCOUNT,
+                // gas: 200000,
+            })
+        } else {
+            tx_response = await signedRC.functions.askQuestionERC20(template_id, qtext, arbitrator, timeout_val, opening_ts, 0, cost, {
+                from: ACCOUNT,
+                // gas: 200000,
+            })
+        }
     }
     handleAskQuestionTX(tx_response);
 
@@ -875,6 +879,9 @@ function hasUnrevealedCommits(question) {
 // ...or if there's an uncommitted answer that hasn't timed out yet
 // TODO: Check for timeouts
 function isAnsweredOrAnswerActive(question) {
+    if (isAnswered(question)) {
+        return true;
+    }
     const history_hash = ethers.BigNumber.from(question.history_hash);
     return (history_hash.gt(0));
 }
@@ -895,7 +902,6 @@ function isCommitExpired(question, posted_ts) {
     return new Date().getTime() > (( posted_ts + commit_secs ) * 1000);
 }
 
-
 function isFinalized(question) {
     if (isArbitrationPending(question)) {
         return false;
@@ -903,6 +909,37 @@ function isFinalized(question) {
     const fin = question.finalization_ts.toNumber()
     const res = ((fin > 1) && (fin * 1000 < new Date().getTime()));
     return res;
+}
+
+// Return true if the question looks like it could be reopened.
+// Doesn't check whether it already has been.
+function isReopenCandidate(question) {
+    if (!isFinalized(question)) {
+        return false;
+    }
+    if (question.best_answer != rc_question.getAnsweredTooSoonValue()) {
+        return false;
+    }
+    if (!rc_contracts.versionHasFeature(RC_INSTANCE_VERSIONS[question.contract.toLowerCase()], 'reopen-question')) {
+        return false;
+    }
+    return true;
+}
+
+// Assumes we already filled the data
+function isReopenable(question) {
+    // TODO: Check if it can be re-reopened
+    // console.log('reopened_by is ', question.reopened_by);
+    // console.log('last_reopened_by is ', question.last_reopened_by);
+    if (question.reopened_by && question.reopened_by != '0x0000000000000000000000000000000000000000000000000000000000000000') {
+        // console.log('already reopened');
+        return false;
+    }
+    if (question.is_reopener) {
+        // console.log('already reopening something else');
+        return false;
+    }
+    return isReopenCandidate(question);
 }
 
 $(document).on('click', '.answer-claim-button', function() {
@@ -1008,6 +1045,24 @@ function validate(win) {
         reward.parent().parent().removeClass('is-error');
     }
 
+    if (win.hasClass('version-supports-min-bond')) {
+        let min_bond_inp = win.find('.question-min-bond');
+        let is_bond_err = false;
+        try {
+            // Parse the number and make sure it works
+            humanToDecimalizedBigNumber(min_bond_inp.val());
+        } catch (e) {
+            console.log('min bond parse err', e);
+            is_bond_err = true;
+        }
+        if (is_bond_err) {
+            min_bond_inp.parent().parent().addClass('is-error');
+            valid = false;
+        } else {
+            min_bond_inp.parent().parent().removeClass('is-error');
+        }
+    }
+
     let options_num = 0;
     const question_type = win.find('.question-type');
     const answer_options = $('.answer-option').toArray();
@@ -1034,6 +1089,7 @@ function validate(win) {
         }
     }
 
+    //console.log('valid is ', valid);
     return valid;
 }
 
@@ -1344,7 +1400,7 @@ async function _ensureAnswerRevealsFetched(contract, question_id, freshness, sta
             // console.log(question_id, bond.toHexString(), 'update answer, before->after:', question['history'][idx].answer, answer_arr[j].args['answer']);
             args['revealed_block'] = answer_arr[j].blockNumber;
             args['answer'] = answer_arr[j].args['answer'];
-            const commitment_id = rc_question.commitmentID(question_id, answer_arr[j].args['answer_hash'], new BigNumber(bond_hex));
+            const commitment_id = rc_question.commitmentID(question_id, answer_arr[j].args['answer_hash'], bond_hex);
             args['commitment_id'] = commitment_id;
             question['history'][idx].args = args;
             delete bond_indexes[bond_hex];
@@ -1355,6 +1411,7 @@ async function _ensureAnswerRevealsFetched(contract, question_id, freshness, sta
     } 
     return question;
 }
+
 
 function filledQuestionDetail(contract, question_id, data_type, freshness, data) {
 
@@ -1415,6 +1472,10 @@ function filledQuestionDetail(contract, question_id, data_type, freshness, data)
                 question.block_mined = data.blockNumber;
                 question.opening_ts = ethers.BigNumber.from(data.args['opening_ts']);
                 question.contract = data.address;
+                question.version_number = RC_INSTANCE_VERSIONS[question.contract.toLowerCase()];
+                if ('reopener_of_question_id' in data.args) {
+                    question.reopener_of_question_id = data.args['reopener_of_question_id'];
+                }
                 //question.bounty = data.args['bounty'];
             }
             break;
@@ -1423,6 +1484,8 @@ function filledQuestionDetail(contract, question_id, data_type, freshness, data)
             if (data && (freshness >= question.freshness.question_json)) {
                 question.freshness.question_json = freshness;
                 question.question_json = data;
+                question.has_invalid_option = rc_question.hasInvalidOption(data, question.version_number);
+                question.has_too_soon_option = rc_question.hasAnsweredTooSoonOption(data, question.version_number);
             }
             break;
 
@@ -1443,6 +1506,11 @@ function filledQuestionDetail(contract, question_id, data_type, freshness, data)
                 question.best_answer = data[Qi_best_answer];
                 question.bond = data[Qi_bond];
                 question.history_hash = data[Qi_history_hash];
+                if (rc_contracts.versionHasFeature(RC_INSTANCE_VERSIONS[question.contract.toLowerCase()], 'min-bond')) {
+                    question.min_bond = data[Qi_min_bond];
+                } else {
+                    question.min_bond = ethers.BigNumber.from(0);
+                }
                 //console.log('set question', question_id, question);
             } else {
                 //console.log('call data too old, not setting', freshness, ' vs ', question.freshness.question_call, question)
@@ -1451,8 +1519,14 @@ function filledQuestionDetail(contract, question_id, data_type, freshness, data)
 
         case 'answers':
             if (data && (freshness >= question.freshness.answers)) {
-                question.freshness.answers = freshness;
-                question['history'] = data;
+                // If the history shrank, ignore the new data unless it's much newer than the old data
+                // This works around an issue where stuff disappears due to a laggy node
+                if (data.length < question['history'].length && (CURRENT_BLOCK_NUMBER - freshness < 100)) { 
+                    console.log('ignoring data that got shorter', data, question['history']);
+                } else {
+                    question.freshness.answers = freshness;
+                    question['history'] = data;
+                }
             }
             if (data.length && question['history_unconfirmed'].length) {
                 for (let j = 0; j < question['history_unconfirmed'].length; j++) {
@@ -1460,7 +1534,7 @@ function filledQuestionDetail(contract, question_id, data_type, freshness, data)
                     for (let i = 0; i < question['history'].length; i++) {
                         // If there's something unconfirmed with an equal or lower bond, remove it
                         if (data[i].args.bond.gte(ubond)) {
-                            //console.log('removing unconfirmed entry due to equal or higher bond from confirmed');
+                            // console.log('removing unconfirmed entry due to equal or higher bond from confirmed');
                             question['history_unconfirmed'].splice(j, 1);
                         }
                     }
@@ -1480,6 +1554,25 @@ function filledQuestionDetail(contract, question_id, data_type, freshness, data)
             }
             //console.log('adding data to history_unconfirmed');
             question['history_unconfirmed'].push(data);
+            break;
+
+        case 'reopener_question':
+            const reopened_by = data[0];
+            const also_too_soon = data[1];
+            const is_reopener = data[2];
+            // Ignore this if it was also answered too soon
+            // TODO: We should probably store the reopened_by somehow
+            question.reopened_by = null;
+            question.last_reopened_by = '0x0000000000000000000000000000000000000000000000000000000000000000';
+            if (reopened_by && reopened_by != '0x0000000000000000000000000000000000000000000000000000000000000000') {
+                // last_reopened_by always holds whatever the contract thinks it was opened by
+                // reopened_by only holds it if it's still active
+                question.last_reopened_by = reopened_by;
+                if (!also_too_soon) {
+                    question.reopened_by = reopened_by;
+                }
+            } 
+            question.is_reopener = is_reopener;
             break;
 
     }
@@ -1527,6 +1620,7 @@ async function _ensureQuestionLogFetched(contract, question_id, freshness, found
     } else {
         // console.log('_ensureQuestionLogFetched fetch fresh ', contract_question_id);
         const question_filter = RCInstance(contract).filters.LogNewQuestion(question_id);
+        //const question_arr = await RCInstance(contract).queryFilter(question_filter, RCStartBlock(contract), 'latest');
         const question_arr = await RCInstance(contract).queryFilter(question_filter, RCStartBlock(contract), 'latest');
         if (question_arr.length == 0) {
             throw new Error("Question log not found, maybe try again later");
@@ -1534,7 +1628,35 @@ async function _ensureQuestionLogFetched(contract, question_id, freshness, found
         if (question_arr.invalid_data) { 
             throw new Error("Invalid data");
         }
-        const question = filledQuestionDetail(contract, question_id, 'question_log', called_block, question_arr[0]);
+        const blocknum = question_arr[0].blockNumber;
+
+        let question = null;
+        const arr = question_arr[0];
+        // See if this question already reopens something else
+        if (rc_contracts.versionHasFeature(RC_INSTANCE_VERSIONS[contract.toLowerCase()], 'reopen-question')) {
+            // The call will tell us if it reopens something
+            const ro_result = await RCInstance(contract).functions.reopener_questions(question_id);
+            const is_reopener = ro_result[0];
+            // We need to query the log to find out what it reopens.
+            // The event should be in the same block (and transaction) as the question creation.
+            let qarr = {};
+            qarr.address = question_arr[0].address;
+            qarr.blockNumber = question_arr[0].blockNumber;
+            qarr.args = Object.assign({}, question_arr[0].args);
+            if (is_reopener) {
+                const reopen_filter = RCInstance(contract).filters.LogReopenQuestion(question_id);
+                const reopen_arr = await RCInstance(contract).queryFilter(reopen_filter, blocknum, blocknum);
+                const reopened_question_id = reopen_arr[0].args.reopened_question_id;
+                // This isn't in the original log so just tack it on as if it is
+
+                qarr.args.reopener_of_question_id = reopened_question_id;
+                // console.log('will fill', reopened_question_id);
+            }            
+            question = filledQuestionDetail(contract, question_id, 'question_log', called_block, qarr);
+        } else {
+            question = filledQuestionDetail(contract, question_id, 'question_log', called_block, question_arr[0]);
+        }
+
         return question;
     }
 }
@@ -1551,7 +1673,40 @@ async function _ensureQuestionDataFetched(contract, question_id, freshness, foun
         if (ethers.BigNumber.from(result[Qi_content_hash]).eq(0)) {
             throw new Error("question not found in call, maybe try again later", question_id);
         }
-        const q = await filledQuestionDetail(contract, question_id, 'question_call', called_block, result);
+        let q = await filledQuestionDetail(contract, question_id, 'question_call', called_block, result);
+
+        if (isReopenCandidate(q)) {
+            // console.log('getting reopener question for', q.question_id, q.contract);
+            const reopener_q_result = await RCInstance(q.contract).functions.reopened_questions(question_id);
+            const reopener_q = reopener_q_result[0];
+            let also_too_soon = null;
+            let is_reopener = false;
+            if (reopener_q != '0x0000000000000000000000000000000000000000000000000000000000000000') {
+                const replacement_data = await RCInstance(q.contract).functions.questions(reopener_q);
+                // Just populate enough for isFinalized
+                // TODO: Maybe better to just do this the normal way...
+                const rq = {
+                    'is_pending_arbitration': replacement_data[Qi_is_pending_arbitration],
+                    'finalization_ts':  ethers.BigNumber.from(replacement_data[Qi_finalization_ts]),
+                    'best_answer': replacement_data[Qi_best_answer]
+                }
+                const is_replacement_finalized = isFinalized(rq);
+                if (is_replacement_finalized) {
+                    if (rq.best_answer == rc_question.getAnsweredTooSoonValue()) {
+                        also_too_soon = true;
+                    } else {
+                        //console.log('best answer is not answeredTooSoonVal', rq);
+                    }
+                } 
+            } else {
+                // Not yet reopened but this may be reopening some other question, in which case it can't be reopened yet
+                const is_reopener_result = await RCInstance(q.contract).functions.reopener_questions(question_id);
+                is_reopener = is_reopener_result[0];
+            }
+
+            q = await filledQuestionDetail(contract, question_id, 'reopener_question', called_block, [reopener_q, also_too_soon, is_reopener]);
+        }
+
         await loadArbitratorMetaData(q.arbitrator); // We keep a separate cache from this, it should usually already be in there
         return q;
         /*
@@ -2352,6 +2507,7 @@ function displayQuestionDetail(question_detail) {
         Ps.initialize(rcqa.find('.rcbrowser-inner').get(0));
     }
 
+    // console.log('set_hash_param', contractQuestionID(question_detail));
     set_hash_param({'question': contractQuestionID(question_detail)});
 
 }
@@ -2417,12 +2573,14 @@ async function loadArbitratorMetaData(arb_addr) {
         const md_arr = await arb.functions.metadata();
         const md = md_arr[0];
         try {
-            metadata_json = JSON.parse(md);
+            if (md != '' && md != ' ') {
+                metadata_json = JSON.parse(md);
+            }
         } catch (e) {
-            console.log('metadata_json could not be parsed', md);
+            console.log('arbitrator', arb_addr, 'returned some metadata but it could not be parsed:', md);
         }
     } catch (e) {
-        console.log('Got an error trying to fetch arbitrator metadata, this is normal with some arbitrators', arb_addr);
+        console.log('Got an error trying to fetch arbitrator metadata, this is expected with some arbitrators', arb_addr);
     }
     ARBITRATOR_METADATA[arb_addr.toLowerCase()] = metadata_json;
     // console.log('loaded metadata', arb_addr, metadata_json);
@@ -2438,6 +2596,13 @@ function populateQuestionWindow(rcqa, question_detail, is_refresh) {
 
     //console.log('current list last item in history, which is ', question_detail['history'])
     const idx = question_detail['history'].length - 1;
+
+    if (question_detail.has_invalid_option) {
+        rcqa.addClass('has-invalid-option');
+    }
+    if (question_detail.has_too_soon_option) {
+        rcqa.addClass('has-too-soon-option');
+    }
 
     const cat_el = rcqa.find('.rcbrowser-main-header-category');
     cat_el.text(category_text(question_json, cat_el)); 
@@ -2458,14 +2623,34 @@ function populateQuestionWindow(rcqa, question_detail, is_refresh) {
 
     const metadata = arbitrationMetaDataFromCache(question_detail.arbitrator);
     if (metadata && 'tos' in metadata && metadata['tos']) {
-        rcqa.find('.arbitrator-tos-link').attr('href', formatPossibleIPFSLink(metadata['tos'])).removeClass('unpopulated');
+        populateTOSSection(rcqa, metadata['tos']);
     } else {
-        rcqa.find('.arbitrator-tos-link').attr('href', '').addClass('unpopulated');
+        populateTOSSection(rcqa, null);
     }
 
     let bond = ethers.BigNumber.from(""+TOKEN_INFO[TOKEN_TICKER]['small_number']).div(2);
-    if (question_detail.bounty && question_detail.bounty.gt(0)) {
+    if (question_detail.min_bond && question_detail.min_bond.gt(0)) {
+        bond = question_detail.min_bond.div(2);
+    } else if (question_detail.bounty && question_detail.bounty.gt(0)) {
         bond = question_detail.bounty.div(2);
+    }
+
+    if (isReopenable(question_detail)) {
+        rcqa.addClass('reopenable').removeClass('reopened');
+        console.log('add reopen section');
+    } else {
+        rcqa.removeClass('reopenable');
+        if (question_detail.reopened_by) {
+            rcqa.attr('data-reopened-by-question-id', cqToID(question_detail.contract, question_detail.reopened_by));
+            rcqa.addClass('reopened');
+        } else {
+            rcqa.removeClass('reopened');
+        }
+    }
+
+    if (question_detail.reopener_of_question_id) {
+        rcqa.addClass('reopener');
+        rcqa.attr('data-reopener-of-question-id', cqToID(question_detail.contract, question_detail.reopener_of_question_id));
     }
 
     if (isAnswerActivityStarted(question_detail)) {
@@ -2596,6 +2781,7 @@ function populateQuestionWindow(rcqa, question_detail, is_refresh) {
     let timeout = question_detail.timeout;
     let balloon = rcqa.find('.question-setting-info').find('.balloon')
     balloon.find('.setting-info-bounty').text(decimalizedBigNumberToHuman(question_detail.bounty));
+    balloon.find('.setting-info-min-bond').text(decimalizedBigNumberToHuman(question_detail.min_bond));
     balloon.find('.setting-info-bond').text(decimalizedBigNumberToHuman(question_detail.bond));
     balloon.find('.setting-info-timeout').text(rc_question.secondsTodHms(question_detail.timeout));
     balloon.find('.setting-info-content-hash').text(question_detail.content_hash);
@@ -2714,7 +2900,7 @@ function populateQuestionWindow(rcqa, question_detail, is_refresh) {
     
     if (!is_refresh) {
         // answer form
-        const ans_frm = makeSelectAnswerInput(question_json, question_detail.opening_ts.toNumber());
+        const ans_frm = makeSelectAnswerInput(question_json, question_detail.opening_ts.toNumber(), question_detail.has_invalid_option, question_detail.has_too_soon_option);
         ans_frm.addClass('is-open');
         ans_frm.removeClass('template-item');
         rcqa.find('.answered-history-container').after(ans_frm);
@@ -2723,11 +2909,10 @@ function populateQuestionWindow(rcqa, question_detail, is_refresh) {
     // If the user has edited the field, never repopulate it underneath them
     const bond_field = rcqa.find('.rcbrowser-input--number--bond.form-item');
     if (!bond_field.hasClass('edited')) {
-        console.log('min bond /2', bond.toString());
+        // console.log('min bond /2', bond.toString());
         bond_field.val(decimalizedBigNumberToHuman(bond.mul(2)));
     }
 
-    //console.log('call updateQuestionState');
     rcqa = updateQuestionState(question_detail, rcqa);
 
     if (isFinalized(question_detail)) {
@@ -3278,7 +3463,7 @@ function renderUserQandA(qdata, entry) {
     populateWithBlockTimeForBlockNumber(qitem, entry.blockNumber, updateBlockTimestamp);
 }
 
-function makeSelectAnswerInput(question_json, opening_ts) {
+function makeSelectAnswerInput(question_json, opening_ts, has_invalid, has_answered_too_soon) {
     const type = question_json['type'];
     const options = question_json['outcomes'];
 
@@ -3318,6 +3503,13 @@ function makeSelectAnswerInput(question_json, opening_ts) {
                 }
                 break;
         }
+    }
+
+    if (!has_invalid) {
+        ans_frm.find('.invalid-select').remove();
+    }
+    if (!has_answered_too_soon) {
+        ans_frm.find('.too-soon-select').remove();
     }
 
     return ans_frm;
@@ -3458,6 +3650,15 @@ function formattedAnswerFromForm(parent_div, question_json) {
         return new_answer;
     }
 
+    // Selects will just have "invalid" as an option in the pull-down.
+    // However, if there is no select we instead use a link underneath the input, and toggle the data-invalid-selected class on the input
+    const has_answered_too_soon_select = (answer_element.attr('data-too-soon-selected') == '1');
+    if (has_answered_too_soon_select) {
+        new_answer = rc_question.getAnsweredTooSoonValue(question_json);
+        console.log('answered too soon selected, so submitting the answered too soon value ', new_answer);
+        return new_answer;
+    }
+
     if (question_json['type'] == 'multiple-select') {
         let answer_input = [];
         parent_div.find('.input-container--checkbox input[type=checkbox]').each(function() {
@@ -3534,6 +3735,7 @@ $(document).on('click', '.post-answer-button', async function(e) {
         const maxNum = ethers.BigNumber.from('0x'+rc_question.maxNumber(question_json).integerValue().toString(16));
         new_answer = formattedAnswerFromForm(parent_div, question_json);
         const invalid_value = rc_question.getInvalidValue(question_json);
+        const answered_too_soon_value = rc_question.getAnsweredTooSoonValue(question_json);
 
         let ans;
         let err = false;
@@ -3544,7 +3746,7 @@ $(document).on('click', '.post-answer-button', async function(e) {
                 } catch(e) {
                     err = true;
                 }
-                if (err || !(ans.eq(ethers.BigNumber.from(0)) || ans.eq(ethers.BigNumber.from(1)) || ans.eq(ethers.BigNumber.from(invalid_value)))) {
+                if (err || !(ans.eq(ethers.BigNumber.from(0)) || ans.eq(ethers.BigNumber.from(1)) || ans.eq(ethers.BigNumber.from(invalid_value)) || ans.eq(ethers.BigNumber.from(answered_too_soon_value)))) {
                     parent_div.find('div.select-container.select-container--answer').addClass('is-error');
                     is_err = true;
                 }
@@ -3556,7 +3758,7 @@ $(document).on('click', '.post-answer-button', async function(e) {
                     err = true;
                 }
                 if (!err) {
-                    if (!ans.eq(ethers.BigNumber.from(invalid_value)) && (ans.lt(minNum) || ans.gt(maxNum))) {
+                    if (!ans.eq(ethers.BigNumber.from(invalid_value)) && !ans.eq(ethers.BigNumber.from(answered_too_soon_value)) && (ans.lt(minNum) || ans.gt(maxNum))) {
                         err = true;
                     } else if (ans.lt(ethers.BigNumber.from(0))) {
                         err = true;
@@ -3574,7 +3776,7 @@ $(document).on('click', '.post-answer-button', async function(e) {
                     err = true;
                 }
                 if (!err) {
-                    if (!ans.eq(ethers.BigNumber.from(invalid_value)) && (ans.lt(minNum) || ans.gt(maxNum))) {
+                    if (!ans.eq(ethers.BigNumber.from(invalid_value)) && !ans.eq(ethers.BigNumber.from(answered_too_soon_value)) && (ans.lt(minNum) || ans.gt(maxNum))) {
                         err = true;
                     }
                 }
@@ -3607,8 +3809,20 @@ $(document).on('click', '.post-answer-button', async function(e) {
                 }
         }
 
+        // UI shouldn't let you do this
+        if (new_answer == invalid_value && !rc_question.hasInvalidOption(question_json, current_question.version_number)) {
+            console.log('invalid not supported');
+            is_err = true;
+        }
+
+        if (new_answer == answered_too_soon_value && !rc_question.hasAnsweredTooSoonOption(question_json, current_question.version_number)) {
+            console.log('answered too soon not supported');
+            is_err = true;
+        }
+
         let min_amount = current_question.bond.mul(2)
         if (bond.lt(min_amount)) {
+console.log('val fail', min_amount, current_question);
             parent_div.find('div.input-container.input-container--bond').addClass('is-error');
             parent_div.find('div.input-container.input-container--bond').find('.min-amount').text(decimalizedBigNumberToHuman(min_amount));
             is_err = true;
@@ -3666,7 +3880,7 @@ $(document).on('click', '.post-answer-button', async function(e) {
             console.log('made bond', bond);
             console.log('made answer_hash', answer_hash);
 
-            const commitment_id = rc_question.commitmentID(question_id, answer_hash, new BigNumber(bond.toHexString()));
+            const commitment_id = rc_question.commitmentID(question_id, answer_hash, bond.toHexString());
             console.log('resulting  commitment_id', commitment_id);
 
             // TODO: We wait for the txid here, as this is not expected to be the main UI pathway.
@@ -3719,6 +3933,159 @@ $(document).on('click', '.post-answer-button', async function(e) {
         console.log(e);
     });
     */
+});
+
+$(document).on('click', '.reopen-question-submit', async function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const parent_div = $(this).parents('div.rcbrowser--qa-detail');
+
+    const contract_question_id = parent_div.attr('data-contract-question-id');
+    const [contract, question_id] = parseContractQuestionID(contract_question_id);
+
+    // reopenQuestion(uint256 template_id, string memory question, address arbitrator, uint32 timeout, uint32 opening_ts, uint256 nonce, uint256 min_bond, bytes32 reopens_question_id)
+
+    await getAccount()
+    // TODO: Recheck in case it's already opened
+
+    const old_question = await ensureQuestionDetailFetched(contract, question_id, 1, 1, 1, -1);
+
+    const handleReopenQuestionTX = async function(tx_response, old_question) {
+        parent_div.addClass('reopening');
+        await tx_response.wait();
+        parent_div.removeClass('reopening');
+
+        // Give the node time to catch up after we get the event
+        await delay(6000);
+
+        // Force a refresh
+        const question = await ensureQuestionDetailFetched(old_question.contract, old_question.question_id);
+        openQuestionWindow(contractQuestionID(old_question));
+    };
+
+
+    /*
+    const handleReopenQuestionTX = function(tx_response, old_question) {
+        //console.log('sent tx with id', txid);
+
+        const txid = tx_response.hash;
+        const contract = old_question.contract;
+
+        // Make a fake log entry
+        const fake_log = {
+            'entry': 'LogNewQuestion',
+            'blockNumber': 0, // unconfirmed
+            'args': {
+                'question_id': question_id,
+                'user': ACCOUNT,
+                'arbitrator': old_question.arbitrator,
+                'timeout': ethers.BigNumber.from(old_question.timeout),
+                'content_hash': old_question.content_hash,
+                'template_id': old_question.template_id,
+                'question': old_question.question_text,
+                'created': ethers.BigNumber.from(parseInt(new Date().getTime() / 1000)),
+                'opening_ts': old_question.opening_ts
+            },
+            'address': contract 
+        }
+        const fake_call = [];
+        fake_call[Qi_finalization_ts] = ethers.BigNumber.from(0);
+        fake_call[Qi_is_pending_arbitration] = false;
+        fake_call[Qi_arbitrator] = old_question.arbitrator;
+        fake_call[Qi_timeout] = ethers.BigNumber.from(old_question.timeout);
+        fake_call[Qi_content_hash] = old_question.content_hash;
+        fake_call[Qi_bounty] = ethers.BigNumber.from(0);;
+        fake_call[Qi_best_answer] = "0x0000000000000000000000000000000000000000000000000000000000000000";
+        fake_call[Qi_bond] = ethers.BigNumber.from(0);
+        fake_call[Qi_min_bond] = old_question.min_bond;
+        fake_call[Qi_history_hash] = "0x0000000000000000000000000000000000000000000000000000000000000000";
+        fake_call[Qi_opening_ts] = ethers.BigNumber.from(old_question.opening_ts);
+
+        let q = filledQuestionDetail(contract, question_id, 'question_log', 0, fake_log);
+        q = filledQuestionDetail(contract, question_id, 'question_call', 0, fake_call);
+        q = filledQuestionDetail(contract, question_id, 'question_json', 0, rc_question.populatedJSONForTemplate(CONTRACT_TEMPLATE_CONTENT[contract.toLowerCase()][old_question.template_id], old_question.question_text));
+
+        // Turn the post question window into a question detail window
+        let rcqa = $('.rcbrowser--qa-detail.template-item').clone();
+        win.html(rcqa.html());
+        win = populateQuestionWindow(win, q, false);
+
+        // TODO: Once we have code to know which network we're on, link to a block explorer
+        win.find('.pending-question-txid a').attr('href', BLOCK_EXPLORER + '/tx/' + txid);
+        win.find('.pending-question-txid a').text(txid.substr(0, 12) + "...");
+        win.addClass('unconfirmed-transaction').addClass('has-warnings');
+        win.attr('data-pending-txid', txid);
+
+        const contract_question_id = contractQuestionID(q);
+
+        win.find('.rcbrowser__close-button').on('click', function() {
+            let parent_div = $(this).closest('div.rcbrowser.rcbrowser--qa-detail');
+            let left = parseInt(parent_div.css('left').replace('px', ''));
+            let top = parseInt(parent_div.css('top').replace('px', ''));
+            let data_x = (parseInt(parent_div.attr('data-x')) || 0);
+            let data_y = (parseInt(parent_div.attr('data-y')) || 0);
+            left += data_x;
+            top += data_y;
+            WINDOW_POSITION[contract_question_id] = {};
+            WINDOW_POSITION[contract_question_id]['x'] = left;
+            WINDOW_POSITION[contract_question_id]['y'] = top;
+            win.remove();
+            document.documentElement.style.cursor = ""; // Work around Interact draggable bug
+        });
+
+        set_hash_param({'question': contractQuestionID(q)});
+
+        const window_id = 'qadetail-' + contractQuestionID(q);
+        win.removeClass('rcbrowser--postaquestion').addClass('rcbrowser--qa-detail');
+        win.attr('id', window_id);
+        win.attr('data-contract-question-id', contractQuestionID(q));
+        Ps.initialize(win.find('.rcbrowser-inner').get(0));
+
+        // TODO: Add handling for tx_response.wait() 
+        // See https://docs.ethers.io/v5/api/providers/types/#providers-TransactionResponse
+
+    }
+    */
+
+    // TODO: Check if the arbitrator has a fee
+    const fee = ethers.BigNumber.from(0);
+
+    // We only want to reopen a question once, plus once for each time it was reopened then settled too soon.
+    // Hash that we don't get a zero which clashes with the normal askQuestion
+    const nonce_food = old_question.question_id + old_question.last_reopened_by ? old_question.last_reopened_by : "0x0000000000000000000000000000000000000000000000000000000000000000";
+    const nonce = ethers.utils.keccak256('0x' + nonce_food.replace('0x', ''));
+    // const nonce = ethers.utils.keccak256(ethers.BigNumber.from(parseInt(Date.now())).toHexString());
+
+    // TODO: The same question may be asked multiple times by the same account, so set the nonce as something other than zero
+    // You only ever want to 
+
+    const signedRC = RCInstance(contract, true);
+    //console.log(old_question.template_id, old_question.question_text, old_question.arbitrator, old_question.timeout, old_question.opening_ts, 0, old_question.min_bond);
+    const tx_response = await signedRC.functions.reopenQuestion(old_question.template_id, old_question.question_text, old_question.arbitrator, old_question.timeout, old_question.opening_ts, nonce, old_question.min_bond, old_question.question_id, {
+        from: ACCOUNT,
+        // gas: 200000,
+    //    value: fee
+    });
+
+    handleReopenQuestionTX(tx_response, old_question);
+
+});
+
+$(document).on('click', '.reopened-question-link', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const cqid = $(this).closest('div.rcbrowser.rcbrowser--qa-detail').attr('data-reopened-by-question-id');
+    console.log('open window for', cqid);
+    openQuestionWindow(cqid);
+});
+
+$(document).on('click', '.reopener-question-link', function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const cqid = $(this).closest('div.rcbrowser.rcbrowser--qa-detail').attr('data-reopener-of-question-id');
+    console.log('open window for', cqid);
+    openQuestionWindow(cqid);
 });
 
 function clearForm(parent_div, question_json) {
@@ -3902,7 +4269,7 @@ $(document).on('keyup', '.rcbrowser-input.rcbrowser-input--number', function(e) 
         const contract_question_id = ctrl.closest('.rcbrowser.rcbrowser--qa-detail').attr('data-contract-question-id');
         const [contract, question_id] = parseContractQuestionID(contract_question_id);
         const current_idx = QUESTION_DETAIL_CACHE[contract_question_id]['history'].length - 1;
-        let current_bond = ethers.BigNumber.from(0);
+        let current_bond = ethers.BigNumber.from(QUESTION_DETAIL_CACHE[contract_question_id].min_bond.div(2));
         if (current_idx >= 0) {
             current_bond = QUESTION_DETAIL_CACHE[contract_question_id]['history'][current_idx].args.bond;
         }
@@ -3941,17 +4308,24 @@ $(document).on('keyup', '.rcbrowser-input.rcbrowser-input--number', function(e) 
 
 $(document).on('click', '.invalid-switch-container a.invalid-text-link', function(evt) {
     evt.stopPropagation();
-    const inp = $(this).closest('.input-container').addClass('invalid-selected').removeClass('is-error').find('input');
+    const cont = $(this).closest('.input-container');
+    const inp = cont.find('input');
+    if (!cont.hasClass('invalid-selected') && !cont.hasClass('too-soon-selected')) {
+        inp.attr('data-old-placeholder', inp.attr('placeholder'));
+    }
+    cont.addClass('invalid-selected').removeClass('too-soon-selected').removeClass('is-error');
     inp.val('');
     inp.attr('readonly', true);
-    inp.attr('data-old-placeholder', inp.attr('placeholder'));
     inp.attr('placeholder', 'Invalid');
+    inp.removeAttr('data-too-soon-selected');
     inp.attr('data-invalid-selected', '1'); // will be read in processing
 });
 
 $(document).on('click', '.invalid-switch-container a.valid-text-link', function(evt) {
     evt.stopPropagation();
-    const inp = $(this).closest('.input-container').removeClass('invalid-selected').removeClass('is-error').find('input');
+    const cont = $(this).closest('.input-container');
+    const inp = cont.find('input');
+    cont.removeClass('invalid-selected').removeClass('too-soon-selected').removeClass('is-error')
     inp.attr('readonly', false);
     let placeholder = inp.attr('data-old-placeholder');
     if (typeof placeholder === typeof undefined || placeholder === false) {
@@ -3960,6 +4334,35 @@ $(document).on('click', '.invalid-switch-container a.valid-text-link', function(
     inp.attr('placeholder', placeholder);
     inp.removeAttr('data-old-placeholder');
     inp.removeAttr('data-invalid-selected'); // will be read in processing
+});
+
+$(document).on('click', '.too-soon-switch-container a.too-soon-text-link', function(evt) {
+    evt.stopPropagation();
+    const cont = $(this).closest('.input-container');
+    const inp = cont.find('input');
+    if (!cont.hasClass('invalid-selected') && !cont.hasClass('too-soon-selected')) {
+        inp.attr('data-old-placeholder', inp.attr('placeholder'));
+    }
+    cont.addClass('too-soon-selected').removeClass('invalid-selected').removeClass('is-error')
+    inp.val('');
+    inp.attr('readonly', true);
+    inp.attr('placeholder', 'Answered too soon');
+    inp.attr('data-too-soon-selected', '1'); // will be read in processing
+    inp.removeAttr('data-invalid-selected');
+});
+
+$(document).on('click', '.too-soon-switch-container a.not-too-soon-text-link', function(evt) {
+    evt.stopPropagation();
+    const cont = $(this).closest('.input-container');
+    const inp = cont.removeClass('too-soon-selected').removeClass('invalid-selected').removeClass('is-error').find('input');
+    inp.attr('readonly', false);
+    let placeholder = inp.attr('data-old-placeholder');
+    if (typeof placeholder === typeof undefined || placeholder === false) {
+        placeholder = '';
+    }
+    inp.attr('placeholder', placeholder);
+    inp.removeAttr('data-old-placeholder');
+    inp.removeAttr('data-too-soon-selected'); // will be read in processing
 });
 
 $(document).on('change', '#post-question-window .question-type,.step-delay,.arbitrator', function(e) {
@@ -4104,7 +4507,9 @@ async function handleEvent(error, result) {
 
                 result = await waitForBlock(result);
                 //console.log('got LogNewAnswer, block ', result.blockNumber);
+                //console.log('runnign ensureQuestionDetailFetched with result for answers', result);
                 const question = await ensureQuestionDetailFetched(contract, question_id, 1, 1, result.blockNumber, result.blockNumber, {'answers': [result]})
+                //console.log('result wasy ', question);
                 updateQuestionWindowIfOpen(question);
                 //console.log('should be getting latest', question, result.blockNumber);
                 scheduleFinalizationDisplayUpdate(contract, question);
@@ -4331,7 +4736,9 @@ async function fetchAndDisplayQuestionsFromLogs(contract, end_block, fetch_i) {
         }
         */
 
-    console.log('fetch range', contract, start_block, end_block, fetch_i);
+    if (fetch_i % 100 == 0) {
+        console.log('fetch range (output will skip the next 99 fetches)', contract, start_block, end_block, fetch_i);
+    }
     fetchAndDisplayQuestionsFromLogs(contract, start_block - 1, fetch_i + 1);
 }
 
@@ -4912,6 +5319,8 @@ window.addEventListener('load', async function() {
         for(const cfg_addr in all_rc_configs) {
             const cfg = all_rc_configs[cfg_addr]; 
             START_BLOCKS[cfg.address.toLowerCase()] = cfg.block;
+            RC_INSTANCE_VERSIONS[cfg.address.toLowerCase()] = cfg.version_number;
+            
         }
 
         // If not found, load the default
@@ -4972,7 +5381,8 @@ window.addEventListener('load', async function() {
         RC_DEFAULT_ADDRESS = rc_json.address;
         for(const cfg_addr in all_rc_configs) {
             const cfg = all_rc_configs[cfg_addr];
-            RC_INSTANCES[cfg_addr.toLowerCase()] = new ethers.Contract(cfg_addr, rc_json.abi, provider);
+            const inst = rc_contracts.realityETHInstance(cfg);
+            RC_INSTANCES[cfg_addr.toLowerCase()] = new ethers.Contract(cfg_addr, inst.abi, provider);
             if (show_all || cfg_addr == RC_DEFAULT_ADDRESS) {
                 RC_DISPLAYED_CONTRACTS.push(cfg_addr);
             }
@@ -5008,7 +5418,12 @@ window.addEventListener('load', async function() {
             CURRENT_BLOCK_NUMBER = block.number;
         }
 
+        if (rc_contracts.versionHasFeature(RC_INSTANCE_VERSIONS[RC_DEFAULT_ADDRESS.toLowerCase()], 'min-bond')) {
+            $('.rcbrowser--postaquestion').addClass('version-supports-min-bond');
+        } 
+
         const limit_to_contract = show_all ? null : RC_DEFAULT_ADDRESS;
+
         pageInit(limit_to_contract);
 
         if (args['question']) {
@@ -5066,9 +5481,9 @@ $('#contract-selection').change(function(e) {
         return;
     }
     if (ctr == '') {
-        window.location.hash = '#!/';
+        set_hash_param({'contract': null});
     } else {
-        window.location.hash = '#!/contract/'+ctr;
+        set_hash_param({'contract': ctr});
     }
     location.reload();
 });

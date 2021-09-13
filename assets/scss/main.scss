@@ -1860,8 +1860,17 @@ div.unconfirmed-question-header span.pending-question-txid {
 .invalid-selected span.input-header{
     visibility: hidden;
 }
-
 .multiple-select .invalid-selected .input-entry {
+    opacity:0.2;
+}
+
+.too-soon-selected .rcbrowser-textarea{
+    background-color: $rcBrowserDarkBg;
+}
+.too-soon-selected span.input-header{
+    visibility: hidden;
+}
+.multiple-select .too-soon-selected .input-entry {
     opacity:0.2;
 }
 
@@ -2054,7 +2063,8 @@ textarea[name="question-body"]:placeholder-shown{
     right: 30px;
 }
 
-div.invalid-switch-container { margin-top:2px; margin-right:2px; text-align:right; padding-bottom: 10px;}
+div.invalid-switch-container { margin-top:2px; margin-right:2px; text-align:right; padding-bottom: 10px; display:none;}
+.has-invalid-option div.invalid-switch-container { display:block; }
 
 .input-container a.valid-text-link { font-size:12px; }
 .input-container a.invalid-text-link { font-size:12px; }
@@ -2063,6 +2073,18 @@ div.invalid-switch-container { margin-top:2px; margin-right:2px; text-align:righ
 .input-container .invalid-text-link { display:block; }
 .input-container.invalid-selected .valid-text-link { display:block; }
 .input-container.invalid-selected .invalid-text-link { display:none; }
+
+
+div.too-soon-switch-container { margin-top:2px; margin-right:2px; text-align:right; padding-bottom: 10px; display:none;}
+.has-too-soon-option div.too-soon-switch-container { display:block; }
+
+.input-container a.not-too-soon-text-link { font-size:12px; }
+.input-container a.too-soon-text-link { font-size:12px; }
+
+.input-container .not-too-soon-text-link { display:none; }
+.input-container .too-soon-text-link { display:block; }
+.input-container.too-soon-selected .not-too-soon-text-link { display:block; }
+.input-container.too-soon-selected .too-soon-text-link { display:none; }
 
 .quick-help {
     position: absolute;
@@ -2102,6 +2124,10 @@ div.invalid-switch-container { margin-top:2px; margin-right:2px; text-align:righ
     transition-timing-function: $ease-in-out-expo;
     animation-fill-mode: both;
     animation-name: bounce;
+}
+
+#post-a-question-window {
+    min-height:660px;
 }
 
 #post-a-question-window .cols-2:nth-child(1) .quick-help-body {
@@ -2192,6 +2218,75 @@ label > span {
 .rcbrowser--qa-detail .submit-container {
     float: none;
     text-align: center;
+}
+
+.rcbrowser--qa-detail .reopen-container {
+    float: none;
+    text-align: center;
+    margin-bottom:20px;
+    padding-bottom:20px;
+    display: none;
+    border-bottom: 1px solid #d9dde0;
+}
+
+.rcbrowser--qa-detail.reopenable .reopen-container {
+    display: block;
+}
+
+.rcbrowser--qa-detail .reopened-container {
+    float: none;
+    text-align: center;
+    margin-bottom:20px;
+    padding-bottom:20px;
+    display: none;
+    border-bottom: 1px solid #d9dde0;
+}
+
+.rcbrowser--qa-detail .reopened-container {
+    text-align: center;
+    display:none;
+}
+
+.rcbrowser--qa-detail.reopened .reopened-container {
+    display: block;
+}
+
+.rcbrowser--qa-detail .reopener-container {
+    float: none;
+    text-align: center;
+    margin-bottom:20px;
+    padding-bottom:20px;
+    display: none;
+    border-bottom: 1px solid #d9dde0;
+}
+
+.rcbrowser--qa-detail .reopener-container {
+    text-align: center;
+    display:none;
+}
+
+.rcbrowser--qa-detail.reopener .reopener-container {
+    display: block;
+}
+
+.reopening-display {
+    display:none;
+}
+
+.reopening .reopening-display {
+    display: block;
+}
+
+.reopening .reopen-display {
+    display:none;
+}
+
+a.reopened-question-link {
+    color: $blue;
+}
+
+a.reopener-question-link {
+    color: $blue;
 }
 
 .rcbrowser--qa-detail .rcbrowser-submit {
@@ -2596,6 +2691,7 @@ div.notifications-template-container {display:none}
 
 option.exceptional-option {font-style: italic}
 option.invalid-select {font-style: italic}
+option.too-soon-select {font-style: italic}
 
 div.questions__item__footer span.question-bounty-container { /* float:right  */ 
     margin-left: 20px;}
@@ -3086,4 +3182,18 @@ div.top-content-controls select {
 
 div.contract-claim-section-template {
     display:none;
+}
+
+.version-supports-min-bond-only {
+    display:none;
+}
+.version-supports-min-bond .version-supports-min-bond-only {
+    display:block;
+}
+
+.arbitrator-tos {
+    display:none;
+}
+.has-arbitrator-tos div.arbitrator-tos {
+    display:block;
 }

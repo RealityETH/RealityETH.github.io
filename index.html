@@ -68,6 +68,7 @@
                     <span class="network-status network-id-77">Sokal Network</span>
                     <span class="network-status network-id-100">XDAI Network</span>
                     <span class="network-status network-id-137">Polygon Main Network (Matic)</span>
+                    <span class="network-status network-id-43114">AVA C-Chain</span>
                     <span class="network-status network-id-42161">Arbitrum One Network</span>
                     <span class="network-status network-id-421611">Arbitrum Rinkeby Test Network</span>
                     <span class="network-status network-id-123411710">Local Test Network</span>
@@ -596,6 +597,26 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="row clearfix version-supports-min-bond-only">
+                        <div class="cols-2">
+                            &nbsp;
+                        </div>
+                        <div class="cols-2">
+                            <div class="input-container  input-container--has-quick-help">
+                                <div class="input-inner">
+                                    <span class="input-header">Minimum bond (<span class="token-ticker-text">ETH</span>):</span>
+                                    <input type="number" name="question-min-bond" class="question-min-bond rcbrowser-input rcbrowser-input--number form-item" placeholder="0" VALUE="0">
+                                </div>
+                                <div class="quick-help">
+                                    <span class="quick-help-button">?</span>
+                                    <div class="quick-help-body"><span>The minimum bond that can be used for the first answer.</span></div>
+                                </div>
+                                <div class="error-container">Please enter minimum bond.</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row clearfix">
                         <div class="cols-2">
                             <div class="select-container select-container--question-arbitrator select-container--has-quick-help">
@@ -690,6 +711,7 @@
 
                 <label class="input-entry template-item"><input id="" type="checkbox" class="rcbrowser-input--checkbox form-item form-item-value" value=""><span>template</span></label>
                 <div class="invalid-switch-container"><a class="invalid-text-link">Mark this question invalid</a><a class="valid-text-link">Mark this question valid</a></div>
+                <div class="too-soon-switch-container"><a class="too-soon-text-link">Mark this question answered too soon</a><a class="not-too-soon-text-link">Mark this question not answered too soon</a></div>
 
                 <div class="error-container">Please select options.</div>
             </div>
@@ -723,6 +745,7 @@
                 <select name="input-answer" class="rcbrowser-select select-answer form-item form-item-value">
                     <option value="default">Select the Answer</option>
                     <option class="invalid-select" value="0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff">Invalid</option>
+                    <option class="too-soon-select" value="0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe">Answered Too Soon</option>
                 </select>
                 <div class="error-container">Please select the answer.</div>
             </div>
@@ -758,6 +781,7 @@
                 </div>
                 <div class="error-container">Please enter number.</div>
                 <div class="invalid-switch-container"><a class="invalid-text-link">Mark this question invalid</a><a class="valid-text-link">Mark this question valid</a></div>
+                <div class="too-soon-switch-container"><a class="too-soon-text-link">Mark this question answered too soon</a><a class="not-too-soon-text-link">Mark this question answerable</a></div>
             </div>
 
             <div class="input-container input-container--bond">
@@ -791,6 +815,7 @@
                 </div>
                 <div class="error-container">Please enter number.</div>
                 <div class="invalid-switch-container"><a class="invalid-text-link">Mark this question invalid</a><a class="valid-text-link">Mark this question valid</a></div>
+                <div class="too-soon-switch-container"><a class="too-soon-text-link">Mark this question answered too soon</a><a class="not-too-soon-text-link">Mark this question answerable</a></div>
             </div>
 
             <div class="input-container input-container--bond">
@@ -824,6 +849,7 @@
                     <option value="1">Yes</option>
                     <option value="0">No</option>
                     <option class="invalid-select" value="0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff">Invalid</option>
+                    <option class="too-soon-select" value="0xfffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffe">Answered too soon</option>
                 </select>
                 <div class="error-container">Please select the answer.</div>
             </div>
@@ -847,7 +873,8 @@
     </div>
     <div class="answer-form-container broken-question template-item" style="display:none">
         <div class="answer-form-header">
-            <span class="answer-prompt-text no-answer-only">You can mark this question invalid.</span>
+            <span class="answer-prompt-text no-answer-only has-invalid-only">You can mark this question invalid.</span>
+            <span class="answer-prompt-text no-answer-only has-too-soon-only">You can mark this question "answered too soon".</span>
             <span class="answer-prompt-text has-answer-only">You can increase the bond on this invalid question.</span>
         </div>
 
@@ -863,7 +890,8 @@
             </div>
 
             <div class="submit-container">
-                <input type="submit" class="rcbrowser-submit button--bounce post-answer-button" value="Mark Invalid">
+                <input type="submit" class="rcbrowser-submit button--bounce post-answer-button has-invalid-only" value="Mark Invalid">
+                <input type="submit" class="rcbrowser-submit button--bounce post-answer-button has-too-soon-only" value="Mark Too Soon">
                 <input type="hidden" name="input-answer" data-invalid-selected="1" class="rcbrowser-input form-item form-item-value">
             </div>
 
@@ -916,6 +944,7 @@
                 <div class="error-container">Please select a date.</div>
 
                     <div class="invalid-switch-container"><a class="invalid-text-link">Mark this question invalid</a><a class="valid-text-link">Mark this question valid</a></div>
+                    <div class="too-soon-switch-container"><a class="too-soon-text-link">Mark this question answered too soon</a><a class="not-too-soon-text-link">Mark this question answerable</a></div>
             </div>
 
             <div class="input-container input-container--bond">
@@ -992,6 +1021,7 @@
                             Open from: <span class="setting-info-opening-ts"></span><br /><br />
                             Timeout: <span class="setting-info-timeout"></span><br /><br />
                             Reward: <span class="setting-info-bounty"></span> <span class="token-ticker-text">ETH</span><br />
+                            Minimum bond: <span class="setting-info-min-bond"></span> <span class="token-ticker-text">ETH</span><br /><br >
                             Highest bond so far: <span class="setting-info-bond"></span> <span class="token-ticker-text">ETH</span><br /><br >
                             Arbitrator: <br /><span class="setting-info-arbitrator"></span><br /><br />
                             Created by: <br /><span class="setting-info-questioner"></span><br /><br />
@@ -1033,15 +1063,38 @@
                     </div>
                 </div>
 
-                <div class="rcbrowser-main-body">
+                <div class="reopen-container">
+                    <div>
+                    This question was answered when it was too soon to know the result.
+                    <br />
+                    If you think it can now be answered, you can reopen it and answer it.</div>
+                
+                    <div class="reopening-display">Reopening...</div>
 
-                    <div class="answer-deadline-container">Deadline: <span class="answer-deadline timeago"></span></div>
-                    <div class="clearfix apply-for-arbitration-container">
-                        <a href="" class="arbitration-button-foreign-proxy unpopulated">Apply for arbitration (Switch network)</a>
-                        <a href="" class="arbitration-button unpopulated">Apply for arbitration (<span class="arbitration-fee"></span> <span class="token-always-native">ETH</span>)</a>
-                        <br />
-                        <a href="" target="_blank" class="arbitrator-tos-link">Terms of service</a>
+                    <div class="reopen-display">
+                        <input type="submit" class="reopen-question-submit rcbrowser-submit button--bounce" value="Reopen" data-browser-id="id0" data-form-type="question">
                     </div>
+                </div>
+
+                <div class="reopened-container">
+                    <div>
+                    This question was answered when it was too soon to know the result. It was then reopened.
+                    <br />
+                    <br />
+                    <a class="reopened-question-link" href="#">See the reopened question.</a>
+                    </div>
+                </div>
+
+                <div class="reopener-container">
+                    <div>
+                    This question reopened a previous question that was answered too soon.
+                    <br />
+                    <br />
+                    <a class="reopener-question-link" href="#">See the original question.</a>
+                    </div>
+                </div>
+
+                <div class="rcbrowser-main-body">
 
                     <div class="no-arbitrator-only no-arbitrator-message">
                         This question does not use an arbitrator. Whoever posts the highest bond will be considered correct.
@@ -1053,6 +1106,16 @@
                         <br />
                         This may mean you need to ask it to arbitrate by some other method.
                         Alternatively it may mean it cannot do arbitration at all, and whoever posts the highest bond will be considered correct.
+                    </div>
+
+                    <div class="answer-deadline-container">Deadline: <span class="answer-deadline timeago"></span></div>
+                    <div class="clearfix apply-for-arbitration-container">
+                        <a href="" class="arbitration-button-foreign-proxy unpopulated">Apply for arbitration (Switch network)</a>
+                        <a href="" class="arbitration-button unpopulated">Apply for arbitration (<span class="arbitration-fee"></span> <span class="token-always-native">ETH</span>)</a>
+                        <div class="arbitrator-tos">
+                            <br />
+                            <a href="" target="_blank" class="arbitrator-tos-link">Terms of service</a>
+                        </div>
                     </div>
 
                     <div class="clearfix pending-arbitration-container">

@@ -38,7 +38,7 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Audit" href="audit.html" />
+    <link rel="next" title="Linking to the Reality.eth dapp" href="dapp_links.html" />
     <link rel="prev" title="White paper" href="whitepaper.html" /> 
 </head>
 
@@ -98,6 +98,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#claims">Claims</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="dapp_links.html">Linking to the Reality.eth dapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="audit.html">Audit</a></li>
 </ul>
 
@@ -168,7 +169,7 @@
             
   <div class="section" id="contract-internals">
 <h1>Contract Internals<a class="headerlink" href="#contract-internals" title="Permalink to this headline">¶</a></h1>
-<p>This document is intended to help you read and understand the RealityETH.sol and RealityETH_ERC20 contracts, in particular their internal data structures. See the previous documents for a higher-level description of what the contracts do.</p>
+<p>This document is intended to help you read and understand the <code class="docutils literal notranslate"><span class="pre">RealityETH.sol</span></code> and <code class="docutils literal notranslate"><span class="pre">RealityETH_ERC20</span></code> contracts, in particular their internal data structures. See the previous documents for a higher-level description of what the contracts do.</p>
 <div class="section" id="questions">
 <h2>Questions<a class="headerlink" href="#questions" title="Permalink to this headline">¶</a></h2>
 <p>A question consists of a string encoding a JSON object. See <a class="reference internal" href="contracts.html"><span class="doc">Using Reality.eth from a contract</span></a>.
@@ -176,15 +177,16 @@ This is structured as a reusable template, plus delimited string supplying param
 <p>The resulting document (template + parameters) identifies a particular question content.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Template</span> <span class="pre">ID</span></code> + <code class="docutils literal notranslate"><span class="pre">Opening</span> <span class="pre">datetime</span></code> + <code class="docutils literal notranslate"><span class="pre">Parameter</span> <span class="pre">string</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">Content</span> <span class="pre">Hash</span></code></p>
 <p>A question with a particular Content Hash may be asked on multiple occasions, some of which may have different arbitrator and timeout settings.</p>
+<p>The content hash and the other settings are hashed to make the Question ID.</p>
 <p>Versions 2 and 2.1:
 <code class="docutils literal notranslate"><span class="pre">Content</span> <span class="pre">Hash</span></code> + <code class="docutils literal notranslate"><span class="pre">Arbitrator</span></code> + <code class="docutils literal notranslate"><span class="pre">Timeout</span></code> + <code class="docutils literal notranslate"><span class="pre">Creator</span></code> + <code class="docutils literal notranslate"><span class="pre">Nonce</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">Question</span> <span class="pre">ID</span></code></p>
-<p>Version3:
+<p>Version 3:
 <code class="docutils literal notranslate"><span class="pre">Content</span> <span class="pre">Hash</span></code> + <code class="docutils literal notranslate"><span class="pre">Arbitrator</span></code> + <code class="docutils literal notranslate"><span class="pre">Timeout</span></code> + <code class="docutils literal notranslate"><span class="pre">Min</span> <span class="pre">Bond</span></code> + <code class="docutils literal notranslate"><span class="pre">Creator</span></code> + <code class="docutils literal notranslate"><span class="pre">Contract</span> <span class="pre">address</span></code> <code class="docutils literal notranslate"><span class="pre">Nonce</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">Question</span> <span class="pre">ID</span></code></p>
 </div>
 <div class="section" id="answer-history-entries">
 <h2>Answer history entries<a class="headerlink" href="#answer-history-entries" title="Permalink to this headline">¶</a></h2>
 <p>Each time an answer is submitted, it creates a history item. The contract later needs to be able to access the entire history to correctly assign bonds at the end of the process.</p>
-<p>The question struct always stores the most recent answer and bond. However, to avoid the need to expand storage for each storage item, we store a only a hash representing the history, and require users to supply the history when they claim bonds.</p>
+<p>The question struct always stores the most recent answer and bond. However, to avoid the need to expand storage for answer, we store a only a single hash representing the entire history, and require users to supply the history when they claim bonds.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Empty</span>&#160; <span class="pre">Bytes32</span></code> + <code class="docutils literal notranslate"><span class="pre">Answer</span></code> + <code class="docutils literal notranslate"><span class="pre">Bond</span></code> + <code class="docutils literal notranslate"><span class="pre">Answerer</span></code> + <code class="docutils literal notranslate"><span class="pre">False</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">History</span> <span class="pre">Hash</span> <span class="pre">1</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">History</span> <span class="pre">Hash</span> <span class="pre">1</span></code> + <code class="docutils literal notranslate"><span class="pre">Answer</span></code> + <code class="docutils literal notranslate"><span class="pre">Bond</span></code> + <code class="docutils literal notranslate"><span class="pre">Answerer</span></code> + <code class="docutils literal notranslate"><span class="pre">False</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">History</span> <span class="pre">Hash</span> <span class="pre">2</span></code></p>
 <p><code class="docutils literal notranslate"><span class="pre">History</span> <span class="pre">Hash</span> <span class="pre">2</span></code> + <code class="docutils literal notranslate"><span class="pre">Answer</span></code> + <code class="docutils literal notranslate"><span class="pre">Bond</span></code> + <code class="docutils literal notranslate"><span class="pre">Answerer</span></code> + <code class="docutils literal notranslate"><span class="pre">False</span></code> -&gt; <code class="docutils literal notranslate"><span class="pre">History</span> <span class="pre">Hash</span> <span class="pre">3</span></code> &lt;- stored in Questions struct</p>
@@ -220,7 +222,7 @@ This is structured as a reusable template, plus delimited string supplying param
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="audit.html" class="btn btn-neutral float-right" title="Audit" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="dapp_links.html" class="btn btn-neutral float-right" title="Linking to the Reality.eth dapp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="whitepaper.html" class="btn btn-neutral float-left" title="White paper" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

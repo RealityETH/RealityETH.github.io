@@ -116,6 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="fees.html">Fees and payments</a></li>
 <li class="toctree-l1"><a class="reference internal" href="whitepaper.html">White paper</a></li>
 <li class="toctree-l1"><a class="reference internal" href="contract_explanation.html">Contract Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dapp_links.html">Linking to the Reality.eth dapp</a></li>
 <li class="toctree-l1"><a class="reference internal" href="audit.html">Audit</a></li>
 </ul>
 
@@ -334,7 +335,7 @@
 <p class="admonition-title">Note</p>
 <p>The Etherscan “write contract” feature has been known to mangle the delimiter character.</p>
 </div>
-<p>As of version 3, you can also specify a mimimum bond below which the initial answer will not be accepted. For this, use the <code class="docutils literal notranslate"><span class="pre">askQuestionWithMinBond()</span></code> or <code class="docutils literal notranslate"><span class="pre">askQuestionWithMinBondERC20()</span></code> method.</p>
+<p>As of version 3, you can also specify a minimum bond below which the initial answer will not be accepted. For this, use the <code class="docutils literal notranslate"><span class="pre">askQuestionWithMinBond()</span></code> or <code class="docutils literal notranslate"><span class="pre">askQuestionWithMinBondERC20()</span></code> method.</p>
 <div class="section" id="accepting-an-answer-only-if-something-has-happened-pre-version-3">
 <h3>Accepting an answer only if something has happened (pre version 3)<a class="headerlink" href="#accepting-an-answer-only-if-something-has-happened-pre-version-3" title="Permalink to this headline">¶</a></h3>
 <p>Once a question has been created and the opening date (if set) reached, it can be answered immediately.</p>
@@ -362,7 +363,7 @@
 <div class="section" id="accepting-an-answer-only-if-something-has-happened-version-3-onwards">
 <h3>Accepting an answer only if something has happened (version 3 onwards)<a class="headerlink" href="#accepting-an-answer-only-if-something-has-happened-version-3-onwards" title="Permalink to this headline">¶</a></h3>
 <p>To simplify the process of accepting only questions with an answer, from version 3 you can substitute <code class="docutils literal notranslate"><span class="pre">forResult()</span></code> with <code class="docutils literal notranslate"><span class="pre">forResultOnceSettled()</span></code>. This screens the result for an answer representing “not yet settled”, represented as <code class="docutils literal notranslate"><span class="pre">bytes32(-2)</span></code>. Rather than returning this answer, it will revert as it would if the question question had not yet been answered. The contract allows any user to reopen a question in this state, creating a new question, repeatedly if necessary. Once a replacement question has been settled, its result is returned using the ID of the original question. A calling contract can ignore the details of this process and know only that it needs to call <code class="docutils literal notranslate"><span class="pre">forResultOnceSettled()</span></code>.</p>
-<p>If using this feature it is also advisable to set a mimimum bond.</p>
+<p>If using this feature it is also advisable to set a minimum bond.</p>
 </div>
 </div>
 <div class="section" id="custom-templates">
