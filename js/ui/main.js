@@ -6,7 +6,6 @@ import Ps from 'perfect-scrollbar';
 (function() {
 
 const ethers = require("ethers");
-const semver = require("semver");
 const timeago = require('timeago.js');
 const timeAgo = new timeago();
 const jazzicon = require('jazzicon');
@@ -438,16 +437,12 @@ function markViewedToDate() {
 }
 
 function humanToDecimalizedBigNumber(num, force_eth) {
-    const decimalstr = force_eth ? "1000000000000000000" : ""+TOKEN_INFO[TOKEN_TICKER]['decimals'];
-    const decimals = (decimalstr.match(/0/g) || []).length;
+    const decimals = force_eth ? 18 : TOKEN_INFO[TOKEN_TICKER]['decimals'];
     return ethers.utils.parseUnits(num, decimals);
 }
 
 function decimalizedBigNumberToHuman(num, force_eth) {
-    // TODO: Change the token list to use a number like 18
-    const decimalstr = force_eth ? "1000000000000000000" : ""+TOKEN_INFO[TOKEN_TICKER]['decimals'];
-    const decimals = (decimalstr.match(/0/g) || []).length;
-    // console.log('decimals are', decimals);
+    const decimals = force_eth ? 18 : TOKEN_INFO[TOKEN_TICKER]['decimals'];
     return ethers.utils.formatUnits(num, decimals).replace(/\.0+$/,'');
 }
 
@@ -5336,6 +5331,7 @@ window.addEventListener('load', async function() {
         initContractSelect(all_rc_configs, rc_config, show_all);
 
         TOKEN_INFO = rc_contracts.chainTokenList(cid);
+console.log('TOKEN_INFO', TOKEN_INFO);
         console.log('got token info', TOKEN_INFO);
 
         const rc_json = rc_contracts.realityETHInstance(rc_config);
