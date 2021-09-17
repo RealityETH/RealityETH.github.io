@@ -903,7 +903,7 @@ module.exports={
             "symbol": "ETH",
             "decimals": 18
         },
-        "network_name": "arbitrum_tbd",
+        "network_name": "arbitrum-one",
         "rpcUrls": [
             "https://arb1.arbitrum.io/rpc",
             "wss://arb1.arbitrum.io/ws"
@@ -911,6 +911,24 @@ module.exports={
         "hostedRPC": "https://arb1.arbitrum.io/rpc",
         "blockExplorerUrls": [
             "https://explorer.arbitrum.io"
+        ]
+    },
+    "43114": {
+        "chainId": "0xa86a",
+        "chainName": "Avalanche Mainnet",
+        "nativeCurrency": {
+            "name": "Avalanche",
+            "symbol": "AVAX",
+            "decimals": 18
+        },
+        "network_name": "avalanche",
+        "rpcUrls": [
+            "https://api.avax.network/ext/bc/C/rpc"
+        ],
+        "hostedRPC": "https://api.avax.network/ext/bc/C/rpc",
+        "graphURL": "https://api.thegraph.com/subgraphs/name/realityeth/realityeth-ava",
+        "blockExplorerUrls": [
+            "https://cchain.explorer.avax.network/"
         ]
     },
     "421611": {
@@ -921,7 +939,7 @@ module.exports={
             "symbol": "ARETH",
             "decimals": 18
         },
-        "network_name": "arbitrum_testnet_tbd",
+        "network_name": "arbitrum-rinkeby",
         "rpcUrls": [
             "https://rinkeby.arbitrum.io/rpc",
             "wss://rinkeby.arbitrum.io/ws"
@@ -4712,6 +4730,19 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         return metadata_json;
     }
 
+    function isTitleLong(title) {
+        if (title.length > 300) {
+            return true;
+        }
+        var words = title.split(' ');
+        for (var i = 0; i < words.length; i++) {
+            if (words[i].length > 50) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     function populateQuestionWindow(rcqa, question_detail, is_refresh) {
 
         // console.log('populateQuestionWindow with detail ', question_detail, is_refresh);
@@ -4737,6 +4768,12 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var date_str = MONTH_LIST[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear();
 
         rcqa.find('.rcbrowser-main-header-date').text(date_str);
+
+        if (isTitleLong(question_json['title'])) {
+            rcqa.addClass('long-title');
+        } else {
+            rcqa.removeClass('long-title');
+        }
         rcqa.find('.question-title').text(question_json['title']).expander({
             slicePoint: 200
         });
@@ -82287,10 +82324,16 @@ exports.getAnswerString = function(question_json, answer) {
         case 'datetime':
             let ts = parseInt(this.bytes32ToString(answer, question_json));
             let dateObj = new Date(ts * 1000);
-            let year = dateObj.getFullYear();
-            let month = dateObj.getMonth() + 1;
-            let date = dateObj.getDate();
+            let year = dateObj.getUTCFullYear();
+            let month = dateObj.getUTCMonth() + 1;
+            let date = dateObj.getUTCDate();
             label = year + '/' + month + '/' + date;
+
+            function pad2(n) { return ("0" + n).slice(-2); }
+            time_label = pad2(dateObj.getUTCHours()) + ':' + pad2(dateObj.getUTCMinutes()) + ':' + pad2(dateObj.getUTCSeconds());
+            if (time_label != '00:00:00') {
+                label = label + ' ' + time_label;
+            }
             break;
     }
 
