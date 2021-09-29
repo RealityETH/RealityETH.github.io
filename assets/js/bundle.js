@@ -5765,6 +5765,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         if (parent_div.find('.invalid-selected').size() > 0) {
             return true;
         }
+        if (parent_div.find('.too-soon-selected').size() > 0) {
+            return true;
+        }
 
         var answer_element = parent_div.find('[name="input-answer"]');
         if (question_json['type'] == 'uint') {
