@@ -700,8 +700,6 @@ a.upper-button:hover {
   visibility: hidden; }
 
 #contract-selection {
-  text-align: right;
-  text-align-last: right;
   font-weight: normal;
   display: inline-block;
   color: #939596;
