@@ -2537,7 +2537,6 @@ select[name="arbitrator"] {
   padding: 0 12px;
   height: 42px;
   line-height: 42px;
-  text-align: right;
   color: #939596; }
 
 select[name="arbitrator"] > option {
