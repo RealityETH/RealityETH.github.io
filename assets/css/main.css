@@ -650,6 +650,11 @@ input, button, textarea, select {
   input::focus, button::focus, textarea::focus, select::focus {
     outline-offset: -2px; }
 
+div.top-content-controls select {
+  appearance: menulist-button;
+  -webkit-appearance: menulist-button;
+  -moz-appearance: menulist-button; }
+
 .hidden {
   display: none; }
 
