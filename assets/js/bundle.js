@@ -969,7 +969,9 @@ module.exports={
                 "address": "0x5b7dD1E86623548AF054A4985F7fc8Ccbb554E2c",
                 "block": 13194676,
                 "notes": null,
-                "arbitrators": {}
+                "arbitrators": {
+                    "0xf72cfd1b34a91a64f9a98537fe63fbab7530adca": "Kleros Arbitrator (DAO Governance)"
+                }
             }
         },
         "FOX": {
@@ -1111,7 +1113,7 @@ module.exports={
                 "block": 27103177,
                 "notes": null,
                 "arbitrators": {
-                    "0xb9fdd2904cbcc5543F02DB948B2CE59Ef10A950E": "Kleros"
+                    "0xb9fdd2904cbcc5543F02DB948B2CE59Ef10A950E": "Kleros Arbitrator (DAO Governance)"
                 }
             }
         },
