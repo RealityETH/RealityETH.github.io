@@ -970,7 +970,8 @@ module.exports={
                 "block": 13194676,
                 "notes": null,
                 "arbitrators": {
-                    "0xf72cfd1b34a91a64f9a98537fe63fbab7530adca": "Kleros Arbitrator (DAO Governance)"
+                    "0x728cba71a3723caab33ea416cb46e2cc9215a596": "Kleros (General Court)",
+                    "0xf72cfd1b34a91a64f9a98537fe63fbab7530adca": "Kleros DAO Governance (Technical Court)"
                 }
             }
         },
@@ -1113,7 +1114,8 @@ module.exports={
                 "block": 27103177,
                 "notes": null,
                 "arbitrators": {
-                    "0xb9fdd2904cbcc5543F02DB948B2CE59Ef10A950E": "Kleros Arbitrator (DAO Governance)"
+                    "0x99489d7bb33539f3d1a401741e56e8f02b9ae0cf": "Kleros (General Court)",
+                    "0xb9fdd2904cbcc5543F02DB948B2CE59Ef10A950E": "Kleros DAO Governance (Technical Court)"
                 }
             }
         },
@@ -2837,7 +2839,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             var q = filledQuestionDetail(contract, question_id, 'question_log', 0, fake_log);
             q = filledQuestionDetail(contract, question_id, 'question_call', 0, fake_call);
-            q = filledQuestionDetail(contract, question_id, 'question_json', 0, rc_question.populatedJSONForTemplate(CONTRACT_TEMPLATE_CONTENT[contract.toLowerCase()][template_id], qtext));
+            q = filledQuestionDetail(contract, question_id, 'question_json', 0, rc_question.populatedJSONForTemplate(CONTRACT_TEMPLATE_CONTENT[contract.toLowerCase()][template_id], qtext, true));
 
             // Turn the post question window into a question detail window
             var rcqa = $('.rcbrowser--qa-detail.template-item').clone();
@@ -3890,7 +3892,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         } else {
             // console.log('_ensureQuestionTemplateFetched fetch fresh', contract_question_id, QUESTION_DETAIL_CACHE[contract_question_id]);
             if (CONTRACT_TEMPLATE_CONTENT[contract.toLowerCase()][template_id]) {
-                var question = filledQuestionDetail(contract, question_id, 'question_json', 1, rc_question.populatedJSONForTemplate(CONTRACT_TEMPLATE_CONTENT[contract.toLowerCase()][template_id], qtext));
+                var question = filledQuestionDetail(contract, question_id, 'question_json', 1, rc_question.populatedJSONForTemplate(CONTRACT_TEMPLATE_CONTENT[contract.toLowerCase()][template_id], qtext, true));
                 return question;
             } else {
                 // The category text should be in the log, but the contract has the block number
@@ -3905,7 +3907,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     //console.log(CONTRACT_TEMPLATE_CONTENT);
                     var populatedq = null;
                     try {
-                        populatedq = rc_question.populatedJSONForTemplate(CONTRACT_TEMPLATE_CONTENT[contract.toLowerCase()][template_id], qtext);
+                        populatedq = rc_question.populatedJSONForTemplate(CONTRACT_TEMPLATE_CONTENT[contract.toLowerCase()][template_id], qtext, true);
                     } catch (e) {
                         console.log('error populating template', CONTRACT_TEMPLATE_CONTENT[contract.toLowerCase()][template_id], qtext, e);
                     }
@@ -82208,7 +82210,7 @@ exports.secondsTodHms = function(sec) {
     return dDisplay + hDisplay + mDisplay + sDisplay;
 }
 
-exports.parseQuestionJSON = function(data) {
+exports.parseQuestionJSON = function(data, errors_to_title) {
 
     var question_json;
     try {
@@ -82216,23 +82218,43 @@ exports.parseQuestionJSON = function(data) {
     } catch(e) {
         question_json = {
             'title': '[Badly formatted question]: ' + data,
-            'type': 'broken-question'
+            'type': 'broken-question',
+            'errors': {"json_parse_failed": true}
         };
     }
     if (question_json['outcomes'] && question_json['outcomes'].length > QUESTION_MAX_OUTCOMES) {
-        throw Error("Too many outcomes");
+        question_json['errors'] = {'too_many_outcomes': true}
+    }
+    if ('type' in question_json && question_json['type'] == 'datetime' && 'precision' in question_json) {
+        if (!(['Y', 'm', 'd', 'H', 'i', 's'].includes(question_json['precision']))) {
+            question_json['errors'] = {'invalid_precision': true};
+        }
+    }
+    // If errors_to_title is specified, we add any error message to the title to make sure we don't lose it
+    if (errors_to_title) {
+        if ('errors' in question_json) {
+            const prependers = {
+                'invalid_precision': 'Invalid date format',
+                'too_many_outcomes': 'Too many outcomes'
+            }
+            for (var e in question_json['errors']) {
+                if (e in prependers) {
+                    question_json['title'] = '['+prependers[e]+'] ' + question_json['title'];
+                }
+            }
+        }
     }
     return question_json;
 
 }
 
-exports.populatedJSONForTemplate = function(template, question) {
+exports.populatedJSONForTemplate = function(template, question, errors_to_title) {
     var qbits = question.split(module.exports.delimiter());
     //console.log('pp', template);
     //console.log('qbits', qbits);
     var interpolated = vsprintf(template, qbits);
     //console.log('resulting template', interpolated);
-    return module.exports.parseQuestionJSON(interpolated);
+    return module.exports.parseQuestionJSON(interpolated, errors_to_title);
 }
 
 exports.encodeText = function(qtype, txt, outcomes, category, lang) {
@@ -82329,18 +82351,72 @@ exports.getAnswerString = function(question_json, answer) {
             }
             break;
         case 'datetime':
+            let precision = 'd';
+            if ('precision' in question_json && ['Y', 'm', 'd', 'H', 'i', 's'].includes(question_json['precision'])) {
+                precision = question_json['precision'];
+            }
             let ts = parseInt(module.exports.bytes32ToString(answer, question_json));
             let dateObj = new Date(ts * 1000);
-            let year = dateObj.getUTCFullYear();
-            let month = dateObj.getUTCMonth() + 1;
-            let date = dateObj.getUTCDate();
-            label = year + '/' + month + '/' + date;
+
+            const year = dateObj.getUTCFullYear();
+            const month = dateObj.getUTCMonth() + 1;
+            const date = dateObj.getUTCDate();
+            const hour = dateObj.getUTCHours();
+            const min = dateObj.getUTCMinutes();
+            const sec = dateObj.getUTCSeconds();
+
+            // We need whatever the precision states, plus anything above
+            const needy = true;
+            const needm = (precision != 'Y');
+            const needd = needm && (precision != 'm');
+            const needH = needd && (precision != 'd');
+            const needi = needH && (precision != 'H');
+            const needs = needi && (precision != 'i');
+
+            // If anything is set then we've got it.
+            // We also consider that anything required by the precision is there, but set to 0
+            const hass = needs || sec > 0;
+            const hasi = needi || hass || min > 0;
+            const hasH = needH || hasi || hour > 0;
+            const hasd = needd || hasH || date > 1;
+            const hasm = needm || hasd || month > 1;
+            const hasy = true;
+
+            // We'll show an invalid warning if we've got a more precise date than the precision demands
+            let invalid = false;
+            if (!needm && hasm) invalid = true;
+            if (!needd && hasd) invalid = true;
+            if (!needH && hasH) invalid = true;
+            if (!needi && hasi) invalid = true;
+            if (!needs && hass) invalid = true;
+
+            if (invalid) {
+                label = '[Invalid datetime]: ';
+            }
 
             function pad2(n) { return ("0" + n).slice(-2); }
-            time_label = pad2(dateObj.getUTCHours()) + ':' + pad2(dateObj.getUTCMinutes()) + ':' + pad2(dateObj.getUTCSeconds());
-            if (time_label != '00:00:00') {
-                label = label + ' ' + time_label;
+    
+            if (hasy) {
+                label += year;
             }
+            if (hasm) {
+                label += '-'+pad2(month);
+            }
+            if (hasd) {
+                label += '-'+pad2(date);
+            }
+            if (hasH) {
+                label += ' '+pad2(hour);
+            } 
+            if (hasi) {
+                label += ':'+pad2(min);
+            } else if (hasH) {
+                // "2021-12-23 11" without the minutes at the end is hard to understand so add "hr"
+                label += 'hr';
+            }
+            if (hass) {
+                label += ':'+pad2(sec);
+            } 
             break;
     }
 
