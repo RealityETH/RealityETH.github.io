@@ -1054,7 +1054,9 @@ module.exports={
                 "address": "0xDf33060F476F8cff7511F806C72719394da1Ad64",
                 "block": 9106451,
                 "notes": null,
-                "arbitrators": {}
+                "arbitrators": {
+                    "0xe27768bdb76a9b742b7ddcfe1539fadaf3b89bc7": "Kleros (General Court)"
+                }
             }
         },
         "TRST": {
@@ -2310,13 +2312,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         if (!u) {
             return '';
         }
-        console.log('consider ink', u);
         if (u.toLowerCase().substr(0, 7) == 'ipfs://') {
-            console.log('replaceint', u);
             u = u.replace('ipfs://', 'https://ipfs.io/ipfs/');
-        } else {
-            console.log('not ipfs', u);
-        }
+        } else {}
         return u;
     }
 
@@ -3505,11 +3503,13 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                                     event: 'LogFinalize',
                                     blockNumber: result.number,
                                     timestamp: question.finalization_ts.toNumber(),
+                                    address: question.contract,
                                     args: {
                                         question_id: question.question_id
                                     }
-                                    //console.log('sending fake entry', fake_entry, question);
-                                };if (updateClaimableDataForQuestion(question, fake_entry, true)) {
+                                };
+                                console.log('sending fake entry', fake_entry, question);
+                                if (updateClaimableDataForQuestion(question, fake_entry, true)) {
                                     updateClaimableDisplay(contract);
                                     updateUserBalanceDisplay();
                                 }
@@ -5479,14 +5479,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 break;
 
             case 'LogFinalize':
-                //console.log('in LogFinalize', entry);
+                console.log('in LogFinalize', entry, contract);
                 notification_id = uiHash('LogFinalize' + entry.args.question_id + entry.args.answer);
-                var finalized_question = RCInstance(contract).LogNewQuestion({
-                    question_id: question_id
-                }, {
-                    fromBlock: RCStartBlock(contract),
-                    toBlock: 'latest'
-                });
                 var timestamp = null;
                 // Fake timestamp for our fake finalize event
                 if (entry.timestamp) {
