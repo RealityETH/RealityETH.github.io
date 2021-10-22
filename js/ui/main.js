@@ -1334,7 +1334,7 @@ function scheduleFinalizationDisplayUpdate(contract, question) {
                                     question_id: question.question_id,
                                 }
                             }
-                            console.log('sending fake entry', fake_entry, question);
+                            // console.log('sending fake entry', fake_entry, question);
                             if (updateClaimableDataForQuestion(question, fake_entry, true)) {
                                 updateClaimableDisplay(contract);
                                 updateUserBalanceDisplay();
@@ -2507,9 +2507,36 @@ function displayQuestionDetail(question_detail) {
 
 function setupDatetimeDatePicker(rcqa) {
 
+    let precision = rcqa.attr('data-datetime-precision');
+    if (!precision) {
+        precision = 'd';
+    }
+    const date_format = (precision == 'Y') ? 'yy' : ( (precision == 'm') ? 'yy-mm' : 'yy-mm-dd' )
+
+    if (precision == 'H' || precision == 'i' || precision == 's') {
+        rcqa.addClass('has-time-input');
+        const plh = {
+            'H': '00',
+            'i': '00:00',
+            's': '00:00:00'
+        }
+        rcqa.find('input.datetime-input-time').attr('placeholder', plh[precision]).attr('maxlength', plh[precision].length);;
+    }
+
+    const dtplh = {
+        'Y': '2000',
+        'm': '2000-01',
+        'd': '2000-01-01',
+        'H': '2000-01-01',
+        'i': '2000-01-01',
+        's': '2000-01-01'
+    }
+    rcqa.find('input.datetime-input-date').attr('placeholder', dtplh[precision]).attr('maxlength', dtplh[precision].length).attr('data-precision', precision);
+
+    // TODO: Set the precision of the date and use it for date and time
     if (rcqa.find('[name="input-answer"]').hasClass('rcbrowser-input--date--answer')) {
         rcqa.find('[name="input-answer"]').datepicker({
-            dateFormat: 'yy-mm-dd',
+            dateFormat: date_format,
             beforeShow: function(input, inst) {
                 if ($(this).closest('.input-container').hasClass('invalid-selected')) {
                     return false;
@@ -2884,9 +2911,20 @@ function populateQuestionWindow(rcqa, question_detail, is_refresh) {
                 const foreign_chain_id_arr = await fpArb.functions.foreignChainId()
                 const foreign_chain_id = foreign_chain_id_arr[0].toNumber();
                 const btn = rcqa.find('.arbitration-button-foreign-proxy');
-                btn.click(function(evt) {
+                btn.click(async function(evt) {
+                    evt.preventDefault();
                     evt.stopPropagation();
-                    const url_data = question_detail;
+
+                    const question_latest = await ensureQuestionDetailFetched(question_detail.contract, question_detail.question_id, 1, 1, CURRENT_BLOCK_NUMBER, CURRENT_BLOCK_NUMBER);
+                    if (!question_latest) {
+                        console.log('Error, question detail not found');
+                        return false;
+                    }
+                    if (question_latest.bond.eq(0)) {
+                        $('body').addClass('error-request-arbitration-without-answer-error').addClass('error');
+                        return false;
+                    }
+                    const url_data = question_latest;
                     url_data['network_id'] = foreign_chain_id
                     url_data['foreign_proxy'] = foreign_proxy;
                     //delete url_data['history_unconfirmed'];
@@ -2939,6 +2977,14 @@ function populateQuestionWindow(rcqa, question_detail, is_refresh) {
         rcqa.removeClass('is-claimable');
     }
 
+    if (question_json.type == 'datetime') {
+        let precision = 'd';
+        if ('precision' in question_json) {
+            precision = question_json['precision']; 
+        }
+        rcqa.attr('data-datetime-precision', precision);
+    }
+    
     setupDatetimeDatePicker(rcqa);
 
     //console.log(claimableItems(question_detail));
@@ -3640,6 +3686,12 @@ function isAnswerInputLookingValid(parent_div, question_json) {
             console.log('empty bool');
             return false;
         } 
+    } else if (question_json['type'] == 'datetime') {
+        const dt_invalids = areDatetimeElementsInvalid(answer_element);            
+        if (dt_invalids[0] || dt_invalids[1]) {
+            console.log('bad datetime');
+            return false;
+        }
     }
     return true;
 
@@ -3681,14 +3733,63 @@ function formattedAnswerFromForm(parent_div, question_json) {
         if (answer_element.val() == '') {
             return null;
         }
-        let answer_date = new Date(answer_element.val());
-        new_answer = rc_question.answerToBytes32(answer_date.getTime() / 1000, question_json);
+        const ts = datetimeElementToTS(answer_element);
+        new_answer = rc_question.answerToBytes32(ts, question_json);
     } else {
         new_answer = rc_question.answerToBytes32(answer_element.val(), question_json);
     }
     console.log('submitting answer', new_answer);
     return new_answer;
 
+}
+
+function areDatetimeElementsInvalid(answer_element) {
+    const precision = answer_element.attr('data-precision');
+    let ts;
+    let is_date_invalid = false;
+    let is_time_invalid = false;
+    try {
+        const dval = answer_element.val();
+        if (dval == '') {
+            throw new Exception("Date empty");
+        }
+        let answer_date = new Date(dval);
+        ts = answer_date.getTime() / 1000;
+    } catch (e) {
+        is_date_invalid = true; 
+    }
+    if (precision == 'H' || precision == 'i' || precision == 's') {
+        let time_element = answer_element.closest('.input-container').find('input.datetime-input-time');
+        let timets;
+        try {
+            const tval = time_element.val();
+            if (tval == '') {
+                throw new Exception("time empty");
+            }
+            const dtd = new Date('1970-01-02T' + tval + 'Z'); // Use 02 not 01 because I'm not sure what happens if we're ahead of utc
+            timets = (dtd.getTime() / 1000) - 86400;
+        } catch (e) {
+            is_time_invalid = true;
+        }
+        //console.log('made time', timets);
+        // ts = ts + timets;
+    }
+    return [is_date_invalid, is_time_invalid];
+}
+
+function datetimeElementToTS(answer_element) {
+    let answer_date = new Date(answer_element.val());
+    let ts = answer_date.getTime() / 1000;
+    const precision = answer_element.attr('data-precision');
+    if (precision == 'H' || precision == 'i' || precision == 's') {
+        let time_element = answer_element.closest('.input-container').find('input.datetime-input-time');
+        //console.log('time el is ', time_element, 'val is ',time_element.val());
+        const dtd = new Date('1970-01-02T' + time_element.val()+ 'Z'); // Use 02 not 01 because I'm not sure what happens if we're ahead of utc
+        const timets = (dtd.getTime() / 1000) - 86400;
+        //console.log('made time', timets);
+        ts = ts + timets;
+    }
+    return ts; 
 }
 
 // post an answer
@@ -4203,7 +4304,7 @@ $(document).on('click', '.arbitration-button', async function(e) {
 
     const contract_question_id = $(lnk).closest('div.rcbrowser.rcbrowser--qa-detail').attr('data-contract-question-id');
     const [contract, question_id] = parseContractQuestionID(contract_question_id);
-    const question_detail = QUESTION_DETAIL_CACHE[contract_question_id];
+    const question_detail = await ensureQuestionDetailFetched(contract, question_id, 1, 1, CURRENT_BLOCK_NUMBER, CURRENT_BLOCK_NUMBER);
     if (!question_detail) {
         console.log('Error, question detail not found');
         return false;
@@ -4215,14 +4316,25 @@ $(document).on('click', '.arbitration-button', async function(e) {
         return false;
     }
 
+    if (question_detail.bond.gt(ethers.BigNumber.from(last_seen_bond_hex))) {
+        console.log('Answer has changed, please click again');
+        return false;
+    }
+
+    if (question_detail.bond.eq(0)) {
+        $('body').addClass('error-request-arbitration-without-answer-error').addClass('error');
+        return false;
+    }
+
     //if (!question_detail.is_arbitration_pending) {}
     const arb = ARBITRATOR_INSTANCE.attach(question_detail.arbitrator);
     arb.functions.getDisputeFee(question_id).then(function(fee_arr) {
         const arbitration_fee = fee_arr[0];
         //console.log('got fee', arbitration_fee.toString());
+        console.log('requestArbitration(',question_id, ethers.BigNumber.from(last_seen_bond_hex), ACCOUNT, arbitration_fee);
 
         const signed_arbitrator = arb.connect(signer);
-        signed_arbitrator.requestArbitration(question_id, ethers.BigNumber.from(last_seen_bond_hex, 16), {from: ACCOUNT, value: arbitration_fee}).then(function(result) {
+        signed_arbitrator.requestArbitration(question_id, ethers.BigNumber.from(last_seen_bond_hex), {from: ACCOUNT, value: arbitration_fee}).then(function(result) {
             console.log('arbitration is requested.', result);
         });
     }).catch(function(err) {
@@ -4318,60 +4430,69 @@ $(document).on('keyup', '.rcbrowser-input.rcbrowser-input--number', function(e) 
 $(document).on('click', '.invalid-switch-container a.invalid-text-link', function(evt) {
     evt.stopPropagation();
     const cont = $(this).closest('.input-container');
-    const inp = cont.find('input');
-    if (!cont.hasClass('invalid-selected') && !cont.hasClass('too-soon-selected')) {
-        inp.attr('data-old-placeholder', inp.attr('placeholder'));
-    }
+    cont.find('input').each(function() {
+        const inp = $(this);
+        if (!cont.hasClass('invalid-selected') && !cont.hasClass('too-soon-selected')) {
+            inp.attr('data-old-placeholder', inp.attr('placeholder'));
+        }
+        inp.val('');
+        inp.attr('readonly', true);
+        inp.attr('placeholder', 'Invalid');
+        inp.removeAttr('data-too-soon-selected');
+        inp.attr('data-invalid-selected', '1'); // will be read in processing
+    });
     cont.addClass('invalid-selected').removeClass('too-soon-selected').removeClass('is-error');
-    inp.val('');
-    inp.attr('readonly', true);
-    inp.attr('placeholder', 'Invalid');
-    inp.removeAttr('data-too-soon-selected');
-    inp.attr('data-invalid-selected', '1'); // will be read in processing
 });
 
 $(document).on('click', '.invalid-switch-container a.valid-text-link', function(evt) {
     evt.stopPropagation();
     const cont = $(this).closest('.input-container');
-    const inp = cont.find('input');
+    cont.find('input').each(function() {
+        const inp = $(this);
+        inp.attr('readonly', false);
+        let placeholder = inp.attr('data-old-placeholder');
+        if (typeof placeholder === typeof undefined || placeholder === false) {
+            placeholder = '';
+        }
+        inp.attr('placeholder', placeholder);
+        inp.removeAttr('data-old-placeholder');
+        inp.removeAttr('data-invalid-selected'); // will be read in processing
+    });
     cont.removeClass('invalid-selected').removeClass('too-soon-selected').removeClass('is-error')
-    inp.attr('readonly', false);
-    let placeholder = inp.attr('data-old-placeholder');
-    if (typeof placeholder === typeof undefined || placeholder === false) {
-        placeholder = '';
-    }
-    inp.attr('placeholder', placeholder);
-    inp.removeAttr('data-old-placeholder');
-    inp.removeAttr('data-invalid-selected'); // will be read in processing
 });
 
 $(document).on('click', '.too-soon-switch-container a.too-soon-text-link', function(evt) {
     evt.stopPropagation();
     const cont = $(this).closest('.input-container');
-    const inp = cont.find('input');
-    if (!cont.hasClass('invalid-selected') && !cont.hasClass('too-soon-selected')) {
-        inp.attr('data-old-placeholder', inp.attr('placeholder'));
-    }
+    cont.find('input').each(function() {
+        const inp = $(this);
+        if (!cont.hasClass('invalid-selected') && !cont.hasClass('too-soon-selected')) {
+            inp.attr('data-old-placeholder', inp.attr('placeholder'));
+        }
+        inp.val('');
+        inp.attr('readonly', true);
+        inp.attr('placeholder', 'Answered too soon');
+        inp.attr('data-too-soon-selected', '1'); // will be read in processing
+        inp.removeAttr('data-invalid-selected');
+    });
     cont.addClass('too-soon-selected').removeClass('invalid-selected').removeClass('is-error')
-    inp.val('');
-    inp.attr('readonly', true);
-    inp.attr('placeholder', 'Answered too soon');
-    inp.attr('data-too-soon-selected', '1'); // will be read in processing
-    inp.removeAttr('data-invalid-selected');
 });
 
 $(document).on('click', '.too-soon-switch-container a.not-too-soon-text-link', function(evt) {
     evt.stopPropagation();
     const cont = $(this).closest('.input-container');
-    const inp = cont.removeClass('too-soon-selected').removeClass('invalid-selected').removeClass('is-error').find('input');
-    inp.attr('readonly', false);
-    let placeholder = inp.attr('data-old-placeholder');
-    if (typeof placeholder === typeof undefined || placeholder === false) {
-        placeholder = '';
-    }
-    inp.attr('placeholder', placeholder);
-    inp.removeAttr('data-old-placeholder');
-    inp.removeAttr('data-too-soon-selected'); // will be read in processing
+    cont.find('input').each(function() {
+        const inp = $(this);
+        inp.attr('readonly', false);
+        let placeholder = inp.attr('data-old-placeholder');
+        if (typeof placeholder === typeof undefined || placeholder === false) {
+            placeholder = '';
+        }
+        inp.attr('placeholder', placeholder);
+        inp.removeAttr('data-old-placeholder');
+        inp.removeAttr('data-too-soon-selected'); // will be read in processing
+    });
+    cont.removeClass('too-soon-selected').removeClass('invalid-selected').removeClass('is-error');
 });
 
 $(document).on('change', '#post-question-window .question-type,.step-delay,.arbitrator', function(e) {
@@ -4924,22 +5045,47 @@ function populateArbitratorOptionLabel(op, fee, txt, tos) {
     }
 }
 
+function appendBeforeOption(sel, weight) {
+    let last_el = null;
+    // Go down the select until we find something with a higher weight than ourselves, then slot in before that
+    // There should always be something there because we have the "other" option at 1000001
+    sel.find('option').each(function(){
+        const el = $(this);
+        if (parseInt(el.attr('data-weight')) > parseInt(weight)) {
+            last_el = el;
+            return false;
+        }
+    });
+    // Always append before the final option if there were no others
+    return last_el;
+}
+
 function populateArbitratorSelect(arb_contract, network_arbs) {
     console.log('got network_arbs', network_arbs);
     $("select[name='arbitrator']").each(function() {
         const as = $(this);
         const a_template = as.find('.arbitrator-template-item');
-        const append_before = a_template.parent().find('.arbitrator-other-select');
+        const a_select = $(this);
+        const other_option = a_template.parent().find('.arbitrator-other-select');
         a_template.remove();
 
-        let is_first = false;
+        // Assign weights governing the order in the select, lowest to be displayed last.
+        // The contract address used for "no arbitrator" should be displayed last (and will be set to 1000000)
+        // The "other" option will be 1000001, already in the HTML
+        let arb_weights = {};
+        let arb_i = 0;
+        for(const na in network_arbs) {
+            arb_weights[na.toLowerCase()] = arb_i;
+            arb_i++;
+        }
 
         $.each(network_arbs, function(na_addr, na_title) {
             if (na_addr.toLowerCase() == RCInstance(RC_DEFAULT_ADDRESS).address.toLowerCase()) {
                 const arb_item = a_template.clone().removeClass('arbitrator-template-item').addClass('arbitrator-option');
+                arb_item.attr('data-weight', '1000000');
                 populateArbitratorOptionLabel(arb_item, ethers.BigNumber.from(0), na_title, "");
                 arb_item.val(na_addr);
-                append_before.after(arb_item);
+                other_option.before(arb_item);
                 return true;
             }
             const mya = arb_contract.attach(na_addr);
@@ -4964,11 +5110,15 @@ function populateArbitratorSelect(arb_contract, network_arbs) {
                         const tos = ('tos' in metadata) ? metadata['tos'] : null;
                         const arb_item = a_template.clone().removeClass('arbitrator-template-item').addClass('arbitrator-option');
                         arb_item.val(na_addr);
-                        populateArbitratorOptionLabel(arb_item, fee, na_title, tos);
-                        if (is_first) {
-                            arb_item.attr('selected', true);
-                            is_first = false;
+                        if (na_addr.toLowerCase() in arb_weights) {
+                            arb_item.attr('data-weight', arb_weights[na_addr.toLowerCase()]);
                         }
+                        populateArbitratorOptionLabel(arb_item, fee, na_title, tos);
+                        //if (arb_item.attr('data-weight') == '1') {
+                        //    arb_item.attr('selected', true);
+                        //}
+                        const append_before = appendBeforeOption(a_select, arb_item.attr('data-weight'));
+                        // append before the item with the highest weight greater than this one
                         append_before.before(arb_item);
                     });
                 } else {
@@ -5468,6 +5618,16 @@ $('.continue-read-only-message').click(function(e) {
     e.preventDefault();
     e.stopPropagation();
     $('body').removeClass('error-no-metamask-plugin').removeClass('error');
+});
+
+$('.continue-message').click(function(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const clear_cls = $(this).attr('data-clear-error');
+    if (clear_cls) {
+        $('body').removeClass('error-' + clear_cls);
+    }
+    $('body').removeClass('error');
 });
 
 $('#token-selection').change(function(e) { 

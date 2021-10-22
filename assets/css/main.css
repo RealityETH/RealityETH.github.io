@@ -3260,6 +3260,12 @@ div.error-bar .metamask-icon {
   width: 88px;
   margin-left: 24px; }
 
+span.error-label.request-arbitration-without-answer-error {
+  display: none; }
+
+body.error-request-arbitration-without-answer-error div.error-bar span.error-label.request-arbitration-without-answer-error {
+  display: inline !important; }
+
 span.error-label.invalid-network {
   display: none; }
 
@@ -3682,10 +3688,11 @@ body.foreign-proxy-transaction-sent .foreign-proxy-transaction-sent-only {
 
 .no-arbitrator-message {
   font-size: 14px;
+  font-style: italic;
   background-color: #f5f6f7;
-  padding: 6px;
-  border: 1px solid #56bbe8;
-  text-align: center; }
+  padding: 8px;
+  text-align: center;
+  margin-bottom: 10px; }
 
 .failed-arbitrator-only {
   display: none; }
@@ -3695,9 +3702,11 @@ body.foreign-proxy-transaction-sent .foreign-proxy-transaction-sent-only {
 
 .failed-arbitrator-message {
   font-size: 14px;
+  font-style: italic;
+  text-align: center;
   background-color: #f5f6f7;
-  padding: 6px;
-  border: 1px solid #56bbe8; }
+  padding: 8px;
+  margin-bottom: 10px; }
 
 span.add-network-button > a {
   text-decoration: underline; }
@@ -3725,4 +3734,16 @@ div.contract-claim-section-template {
   display: none; }
 
 .has-arbitrator-tos div.arbitrator-tos {
+  display: block; }
+
+.has-time-input input.datetime-input-date {
+  width: 48%; }
+
+input.datetime-input-time {
+  width: 48%;
+  display: none;
+  float: right; }
+
+.has-time-input input.datetime-input-time {
+  visibility: visible;
   display: block; }
