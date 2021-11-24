@@ -895,6 +895,23 @@ module.exports={
             "https://polygonscan.com/"
         ]
     },
+    "777": {
+        "chainId": "0x309",
+        "chainName": "cheapETH",
+        "nativeCurrency": {
+            "name": "cTH",
+            "symbol": "cTH",
+            "decimals": 18
+        },
+        "network_name": "cheapeth",
+        "rpcUrls": [
+            "https://node.cheapeth.org/rpc"
+        ],
+        "hostedRPC": "https://node.cheapeth.org/rpc",
+        "blockExplorerUrls": [
+            "https://explore.cheapswap.io/"
+        ]
+    },
     "42161": {
         "chainId": "0xa4b1",
         "chainName": "Arbitrum One",
@@ -1241,6 +1258,16 @@ module.exports={
             }
         }
     },
+    "777": {
+        "CTH": {
+            "RealityETH-3.0": {
+                "address": "0xF935d11116fA0103Bd340B663879d325673106f0",
+                "block": 13539397,
+                "notes": null,
+                "arbitrators": {}
+            }
+        }
+    },
     "42161": {
         "ARETH": {
             "Arbitrator": {
@@ -1320,6 +1347,13 @@ module.exports={
         "small_number": 10000000000000000,
         "native_chains": {
             "56": true
+        }
+    },
+    "CTH": {
+        "decimals": 18,
+        "small_number": 10000000000000000000,
+        "native_chains": {
+            "777": true
         }
     },
     "ETH": {
@@ -7615,12 +7649,21 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             var rc_config = null;
             var show_all = true;
             if (args['contract']) {
-                rc_config = all_rc_configs[args['contract']];
-                show_all = false;
+                for (var cfg_addr in all_rc_configs) {
+                    // If we got a valid version number for the contract, switch that out for the address and pretend we got that
+                    if (args['contract'] == 'v' + all_rc_configs[cfg_addr].version_number) {
+                        args['contract'] = cfg_addr;
+                    }
+                    if (cfg_addr.toLowerCase() == args['contract'].toLowerCase()) {
+                        rc_config = all_rc_configs[cfg_addr];
+                        show_all = false;
+                        break;
+                    }
+                }
             }
 
-            for (var cfg_addr in all_rc_configs) {
-                var cfg = all_rc_configs[cfg_addr];
+            for (var _cfg_addr in all_rc_configs) {
+                var cfg = all_rc_configs[_cfg_addr];
                 START_BLOCKS[cfg.address.toLowerCase()] = cfg.block;
                 RC_INSTANCE_VERSIONS[cfg.address.toLowerCase()] = cfg.version_number;
             }
@@ -7682,26 +7725,26 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
 
             RC_DEFAULT_ADDRESS = rc_json.address;
-            for (var _cfg_addr in all_rc_configs) {
-                var _cfg = all_rc_configs[_cfg_addr];
+            for (var _cfg_addr2 in all_rc_configs) {
+                var _cfg = all_rc_configs[_cfg_addr2];
                 var inst = rc_contracts.realityETHInstance(_cfg);
-                RC_INSTANCES[_cfg_addr.toLowerCase()] = new ethers.Contract(_cfg_addr, inst.abi, provider);
-                if (show_all || _cfg_addr == RC_DEFAULT_ADDRESS) {
-                    RC_DISPLAYED_CONTRACTS.push(_cfg_addr);
+                RC_INSTANCES[_cfg_addr2.toLowerCase()] = new ethers.Contract(_cfg_addr2, inst.abi, provider);
+                if (show_all || _cfg_addr2 == RC_DEFAULT_ADDRESS) {
+                    RC_DISPLAYED_CONTRACTS.push(_cfg_addr2);
                 }
 
                 // Everyone gets the initial config
-                CONTRACT_TEMPLATE_CONTENT[_cfg_addr.toLowerCase()] = TEMPLATE_CONFIG.content;
+                CONTRACT_TEMPLATE_CONTENT[_cfg_addr2.toLowerCase()] = TEMPLATE_CONFIG.content;
 
-                ARBITRATOR_LIST_BY_CONTRACT[_cfg_addr.toLowerCase()] = {};
-                ARBITRATOR_LIST_BY_CONTRACT[_cfg_addr.toLowerCase()][_cfg_addr.toLowerCase()] = 'No arbitration (highest bond wins)';
-                ARBITRATOR_VERIFIED_BY_CONTRACT[_cfg_addr.toLowerCase()] = {};
-                ARBITRATOR_VERIFIED_BY_CONTRACT[_cfg_addr.toLowerCase()][_cfg_addr.toLowerCase()] = true;
-                ARBITRATOR_FAILED_BY_CONTRACT[_cfg_addr.toLowerCase()] = {};
+                ARBITRATOR_LIST_BY_CONTRACT[_cfg_addr2.toLowerCase()] = {};
+                ARBITRATOR_LIST_BY_CONTRACT[_cfg_addr2.toLowerCase()][_cfg_addr2.toLowerCase()] = 'No arbitration (highest bond wins)';
+                ARBITRATOR_VERIFIED_BY_CONTRACT[_cfg_addr2.toLowerCase()] = {};
+                ARBITRATOR_VERIFIED_BY_CONTRACT[_cfg_addr2.toLowerCase()][_cfg_addr2.toLowerCase()] = true;
+                ARBITRATOR_FAILED_BY_CONTRACT[_cfg_addr2.toLowerCase()] = {};
                 if ('arbitrators' in _cfg) {
                     for (var arb_addr in _cfg['arbitrators']) {
-                        ARBITRATOR_LIST_BY_CONTRACT[_cfg_addr.toLowerCase()][arb_addr.toLowerCase()] = _cfg['arbitrators'][arb_addr];
-                        ARBITRATOR_VERIFIED_BY_CONTRACT[_cfg_addr.toLowerCase()][arb_addr.toLowerCase()] = true;
+                        ARBITRATOR_LIST_BY_CONTRACT[_cfg_addr2.toLowerCase()][arb_addr.toLowerCase()] = _cfg['arbitrators'][arb_addr];
+                        ARBITRATOR_VERIFIED_BY_CONTRACT[_cfg_addr2.toLowerCase()][arb_addr.toLowerCase()] = true;
                     }
                 } else {
                     console.log('no arbs in config', _cfg);

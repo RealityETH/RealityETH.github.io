@@ -5471,8 +5471,17 @@ window.addEventListener('load', async function() {
         let rc_config = null;
         let show_all = true;
         if (args['contract']) {
-            rc_config = all_rc_configs[args['contract']]; 
-            show_all = false;
+            for(const cfg_addr in all_rc_configs) {
+                // If we got a valid version number for the contract, switch that out for the address and pretend we got that
+                if (args['contract'] == 'v' + all_rc_configs[cfg_addr].version_number) {
+                    args['contract'] = cfg_addr;
+                }
+                if (cfg_addr.toLowerCase() == args['contract'].toLowerCase()) {
+                    rc_config = all_rc_configs[cfg_addr];
+                    show_all = false;
+                    break;
+                }
+            }
         }
 
         for(const cfg_addr in all_rc_configs) {
