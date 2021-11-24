@@ -3260,10 +3260,10 @@ div.error-bar .metamask-icon {
   width: 88px;
   margin-left: 24px; }
 
-span.error-label.request-arbitration-without-answer-error {
+div.error-label.request-arbitration-without-answer-error {
   display: none; }
 
-body.error-request-arbitration-without-answer-error div.error-bar span.error-label.request-arbitration-without-answer-error {
+body.error-request-arbitration-without-answer-error div.error-bar div.error-label.request-arbitration-without-answer-error {
   display: inline !important; }
 
 span.error-label.invalid-network {
