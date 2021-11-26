@@ -775,6 +775,23 @@ module.exports={
             "https://ubqblockexplorer.com/"
         ]
     },
+    "10": {
+        "chainId": "0xa",
+        "chainName": "Optimistic Ethereum",
+        "nativeCurrency": {
+            "name": "Ether",
+            "symbol": "OETH",
+            "decimals": 18
+        },
+        "network_name": "mainnet",
+        "rpcUrls": [
+            "https://mainnet.optimism.io/"
+        ],
+        "hostedRPC": "https://mainnet.optimism.io",
+        "blockExplorerUrls": [
+            "https://optimistic.etherscan.io"
+        ]
+    },
     "42": {
         "chainId": "0x2a",
         "chainName": "Ethereum Testnet Kovan",
@@ -824,6 +841,23 @@ module.exports={
         "blockExplorerUrls": [
             "https://bscscan.com",
             "https://www.bscscan.com"
+        ]
+    },
+    "69": {
+        "chainId": "0x45",
+        "chainName": "Optimistic Ethereum Testnet Kovan",
+        "nativeCurrency": {
+            "name": "Kovan Ether",
+            "symbol": "KOR",
+            "decimals": 18
+        },
+        "network_name": "kovan",
+        "rpcUrls": [
+            "https://kovan.optimism.io/"
+        ],
+        "hostedRPC": "https://kovan.optimism.io",
+        "blockExplorerUrls": [
+            "https://kovan-optimistic.etherscan.io"
         ]
     },
     "77": {
@@ -1186,6 +1220,16 @@ module.exports={
             }
         }
     },
+    "69": {
+        "OETH": {
+            "RealityETH-3.0": {
+                "address": "0x327543eaf65FE0D68333d4D092282cDBA0Bc37a6",
+                "block": -2,
+                "notes": null,
+                "arbitrators": {}
+            }
+        }
+    },
     "77": {
         "XDAI": {
             "RealityETH-2.1-rc1": {
@@ -1370,6 +1414,14 @@ module.exports={
         "small_number": 1000000000000000000,
         "native_chains": {
             "137": true
+        }
+    },
+    "OETH": {
+        "decimals": 18,
+        "small_number": 10000000000000000000,
+        "native_chains": {
+            "10": true,
+            "69": true
         }
     },
     "UBQ": {
@@ -1585,6 +1637,10 @@ function chainData(chain_id) {
     return chain_info[""+chain_id];
 }
 
+function isChainSupported(chain_id) {
+    return (""+chain_id in chain_info);
+}
+
 function walletAddParameters(chain_id) {
     var params = ['chainId', 'chainName', 'nativeCurrency', 'rpcUrls', 'blockExplorerUrls']
     var ret = {};
@@ -1644,6 +1700,7 @@ module.exports.walletAddParameters = walletAddParameters;
 module.exports.templateConfig = templateConfig;
 module.exports.defaultTokenForChain = defaultTokenForChain;
 module.exports.versionHasFeature = versionHasFeature;
+module.exports.isChainSupported = isChainSupported;
 
 },{"./abi/solc-0.4.25/Arbitrator.abi.json":1,"./abi/solc-0.4.25/ERC20.abi.json":2,"./abi/solc-0.8.6/RealityETH-2.0.abi.json":3,"./abi/solc-0.8.6/RealityETH-2.1.abi.json":4,"./abi/solc-0.8.6/RealityETH-3.0.abi.json":5,"./abi/solc-0.8.6/RealityETH_ERC20-2.0.abi.json":6,"./abi/solc-0.8.6/RealityETH_ERC20-3.0.abi.json":7,"./config/templates.json":8,"./generated/chains.json":9,"./generated/contracts.json":10,"./generated/tokens.json":11,"fs":256}],13:[function(require,module,exports){
 module.exports=  [
@@ -7548,7 +7605,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             specified_network_txt = '[unknown network]';
         }
         if (detected_network_txt == '') {
-            detected_network_txt = '[unknown network]';
+            detected_network_txt = 'another network';
         }
         console.log(specified_network_txt, detected_network_txt);
 
@@ -7640,8 +7697,23 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 $("#filter-list").find("[data-category='all']").addClass("selected");
             }
 
+            if (args['network'] && parseInt(args['network']) != parseInt(cid)) {
+                if (!rc_contracts.isChainSupported(parseInt(args['network']))) {
+                    $('body').addClass('error-invalid-network').addClass('error');
+                    return;
+                } else {
+                    displayWrongChain(parseInt(args['network']), parseInt(cid));
+                }
+                return;
+            }
+
+            if (!rc_contracts.isChainSupported(cid)) {
+                $('body').addClass('error-invalid-network').addClass('error');
+                return;
+            }
+
             if (!TOKEN_TICKER) {
-                TOKEN_TICKER = rc_contracts.defaultTokenForChain(cid); // TODO: Rename to defaultTokenForChain
+                TOKEN_TICKER = rc_contracts.defaultTokenForChain(cid);
                 console.log('picked token', TOKEN_TICKER);
             }
 
@@ -7703,11 +7775,6 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             if (!initChain(cid)) {
                 $('body').addClass('error-invalid-network').addClass('error');
-                return;
-            }
-
-            if (args['network'] && parseInt(args['network']) != parseInt(cid)) {
-                displayWrongChain(parseInt(args['network']), parseInt(cid));
                 return;
             }
 
