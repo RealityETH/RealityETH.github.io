@@ -3628,6 +3628,9 @@ body.foreign-proxy #site-introduction__buttons {
 body.foreign-proxy .foreign-proxy-section {
   display: block; }
 
+body.foreign-proxy .top-content-controls {
+  display: none; }
+
 .foreign-proxy-network-mismatch-only {
   display: none; }
 
