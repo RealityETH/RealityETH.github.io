@@ -7569,11 +7569,16 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         var arb = new ethers.Contract(arb_addr, PROXIED_ARBITRATOR_ABI, provider);
 
         try {
-            var existing_arr = await arb.functions.arbitrationIDToDisputeExists(question_id);
+            var existing_arr = await arb.functions.arbitrationIDToDisputeExists(ethers.BigNumber.from(question_id));
+            console.log('got ', existing_arr, question_id);
             dispute_exists = existing_arr[0];
         } catch (e) {
-            var _existing_arr = await arb.functions.questionIDToDisputeExists(question_id);
-            dispute_exists = _existing_arr[0];
+            try {
+                var _existing_arr = await arb.functions.questionIDToDisputeExists(question_id);
+                dispute_exists = _existing_arr[0];
+            } catch (err) {
+                console.log('Tried to check existence of question ID but calls to both old and new versions failed.');
+            }
         }
 
         console.log('existing dispute_exists?', dispute_exists);
