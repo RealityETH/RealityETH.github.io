@@ -1237,9 +1237,7 @@ module.exports={
                 "block": 17307142,
                 "token_address": null,
                 "notes": "Same as 2.1 except missing an empty address check",
-                "arbitrators": {
-                    "0x37Fcdb26F12f3FC76F2424EC6B94D434a959A0f7": "Kleros (testing)"
-                }
+                "arbitrators": {}
             },
             "RealityETH-2.1": {
                 "address": "0x90a617ed516ab7fAaBA56CcEDA0C5D952f294d03",
@@ -2599,7 +2597,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
         var op = $(this).find('option:selected');
         var tos_url = op.attr('data-tos-url');
-        console.log('tos_url', tos_url, 'op', op);
+        // console.log('tos_url', tos_url, 'op', op);
 
         populateTOSSection($(this).closest('.select-container'), tos_url);
     });
@@ -7578,33 +7576,28 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             var existing_arr = await arb.functions.arbitrationIDToDisputeExists(ethers.BigNumber.from(question_id));
             // console.log('got ', existing_arr, question_id);
             dispute_exists = existing_arr[0];
-
-            // See if it was requested by the current user but hasn't been handled yet
-            if (!dispute_exists) {
-                var arb_req_filter = arb.filters.ArbitrationRequested(question_id);
-                var arb_requests = await arb.queryFilter(arb_req_filter);
-
-                if (arb_requests.length > 0) {
-                    for (var arb_req in arb_requests) {
-                        var req_addr = arb_requests[arb_req].args._requester;
-                        var existing_2 = await arb.functions.arbitrationRequests(ethers.BigNumber.from(question_id), req_addr);
-                        if (existing_2.status && existing_2.status > 0 && existing_2.status < 4) {
-                            // Created and not failed
-                            dispute_exists = true;
-                            break;
-                        }
-                    }
-                }
-            }
         } catch (e) {
             console.log('Error trying new contract API, trying old API');
             arb = new ethers.Contract(arb_addr, PROXIED_ARBITRATOR_ABI_OLD, provider);
             old_version = true;
-            try {
-                var _existing_arr = await arb.functions.questionIDToDisputeExists(question_id);
-                dispute_exists = _existing_arr[0];
-            } catch (err) {
-                console.log('Tried to check existence of question ID but calls to both old and new versions failed.', e, err);
+            var _existing_arr = await arb.functions.questionIDToDisputeExists(question_id);
+            dispute_exists = _existing_arr[0];
+        }
+
+        // See if it was requested but hasn't been handled yet
+        if (!dispute_exists) {
+            var arb_req_filter = arb.filters.ArbitrationRequested(question_id);
+            var arb_requests = await arb.queryFilter(arb_req_filter);
+            if (arb_requests.length > 0) {
+                for (var arb_req in arb_requests) {
+                    var req_addr = arb_requests[arb_req].args._requester;
+                    var existing_2 = await arb.functions.arbitrationRequests(ethers.BigNumber.from(question_id), req_addr);
+                    if (existing_2.status && existing_2.status > 0 && existing_2.status < 4) {
+                        // Created and not failed
+                        dispute_exists = true;
+                        break;
+                    }
+                }
             }
         }
 
@@ -7625,7 +7618,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     // Normally would be, but Kleros didn't like the max_previous method
                     //  arb.requestArbitration(question_id, ethers.BigNumber.from(last_seen_bond_hex, 16), {from:ACCOUNT, value: arbitration_fee})
                     var SignedArbitrator = arb.connect(signer);
-                    if (old_version) {
+                    if (false && old_version) {
                         console.log('Sending arbitration request using old API');
                         // console.log('using best answer', FOREIGN_PROXY_DATA.best_answer);
                         SignedArbitrator.functions.requestArbitration(question_id, FOREIGN_PROXY_DATA.best_answer, { from: ACCOUNT, value: fee }).then(function (result_tx) {
