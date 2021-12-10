@@ -3739,6 +3739,9 @@ div.contract-claim-section-template {
 .has-arbitrator-tos div.arbitrator-tos {
   display: block; }
 
+.unconfirmed-answer-item .timeago-container {
+  visibility: hidden; }
+
 .has-time-input input.datetime-input-date {
   width: 48%; }
 

@@ -2289,6 +2289,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
     var FOREIGN_PROXY_DATA = {};
     var ARBITRATOR_METADATA = require('./arbitrator_metadata_legacy.json'); // Old contracts don't have this so hard-code it
 
+    var PENDING_USER_TXES_BY_CQID = {};
+
     var TEMPLATE_CONFIG = rc_contracts.templateConfig();
     var QUESTION_TYPE_TEMPLATES = TEMPLATE_CONFIG.base_ids;
 
@@ -2395,6 +2397,165 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         }
 
         return uiHash(paramstr + seed);
+    }
+
+    async function loadPendingTransactions(chain_id) {
+
+        var txliststr = window.localStorage.getItem('tx-' + chain_id);
+        //txliststr = '0x815a2c9da2280065fe317a913e0a6141c5a5e3342ec92e1e1c7115f3dd4d1ed6';
+        if (!txliststr) {
+            return;
+        }
+        // We don't use a delimiter as the 0x will delimit them
+        var txlist = txliststr.split('0x');
+        for (var i = 0; i < txlist.length; i++) {
+            var txid = '0x' + txlist[i];
+            if (txid == '0x') {
+                continue;
+            }
+            // console.log('loadPendingTransactions txid', txid);
+            var tx = await provider.getTransaction(txid);
+            fillPendingUserTX(tx);
+        }
+        // console.log('PENDING_USER_TXES_BY_CQID', PENDING_USER_TXES_BY_CQID);
+    }
+
+    function fillPendingUserTX(tx) {
+
+        var txid = tx.hash;
+        var inst = RCInstance(tx.to);
+        if (!inst) {
+            console.log('contract ', tx.to, ' for txid not known', txid);
+            return;
+        }
+        var inf = inst.interface;
+        // console.log('inst is ', inst);
+        var dec = inf.parseTransaction(tx);
+        if (!dec) {
+            console.log('could not parse tx', txid);
+        }
+        if (dec.functionFragment.name != 'submitAnswer' && dec.functionFragment.name != 'submitAnswerERC20') {
+            console.log('txid', txid, 'not submitAnswer, ignoring');
+        }
+        var cqid = cqToID(tx.to, dec.args.question_id);
+
+        // ERC20 will have the bond in the args, native will have it in the value
+        // TODO: native may be wrong if the arbitrator has a question fee
+        var bond = 'bond' in dec.args ? dec.args.bond : dec.value;
+
+        var fake_history = {
+            'args': {
+                'answer': dec.args.answer,
+                'question_id': dec.args.question_id,
+                'history_hash': null, // TODO Do we need this?
+                'user': ACCOUNT,
+                'bond': bond,
+                'ts': ethers.BigNumber.from(parseInt(new Date().getTime() / 1000)), // todo
+                'is_commitment': false // TODO
+            },
+            'event': 'LogNewAnswer',
+            'blockNumber': tx.blockNumber,
+            'txid': txid
+        };
+
+        if (!PENDING_USER_TXES_BY_CQID[cqid]) {
+            PENDING_USER_TXES_BY_CQID[cqid] = {};
+        }
+        PENDING_USER_TXES_BY_CQID[cqid][bond.toHexString()] = fake_history;
+
+        // If we already had the question displayed when we discovered the pending transaction, update the window
+        if (QUESTION_DETAIL_CACHE[cqid]) {
+            QUESTION_DETAIL_CACHE[cqid] = mergeConfirmedTXes(QUESTION_DETAIL_CACHE[cqid]);
+            updateQuestionWindowIfOpen(QUESTION_DETAIL_CACHE[cqid]);
+        }
+
+        return true;
+    }
+
+    function mergeConfirmedTXes(question) {
+
+        // Make a lookup table of the history by bond
+        var history_bond_to_idx = {};
+        var history_unconfirmed_bond_to_idx = {};
+        if (question['history'] && question['history'].length > 0) {
+            for (var hi = 0; hi < question['history'].length; hi++) {
+                if (!question['history'][hi].args) {
+                    console.log('no args in history item', question['history'][hi]);
+                    continue;
+                }
+                history_bond_to_idx[question['history'][hi].args.bond.toHexString()] = hi;
+            }
+        }
+        if (question['history_unconfirmed'] && question['history_unconfirmed'].length > 0) {
+            for (var ui = 0; ui < question['history_unconfirmed'].length; ui++) {
+                if (!question['history_unconfirmed'][ui].args) {
+                    console.log('no args in history_unconfirmed item', question['history_unconfirmed'][ui]);
+                    continue;
+                }
+                history_unconfirmed_bond_to_idx[question['history_unconfirmed'][ui].args.bond.toHexString()] = ui;
+            }
+        }
+
+        // If we have anything in the user pending pool that isn't in the unconfirmed list, add it to the unconfirmed pool
+        var pending_entries_by_bond = PENDING_USER_TXES_BY_CQID[contractQuestionID(question)];
+        if (pending_entries_by_bond) {
+            // console.log('got relevant pending_entries_by_bond', contractQuestionID(question), pending_entries_by_bond);
+            for (var b in pending_entries_by_bond) {
+                // If there's a confirmed history entry at that level, boot it
+                if (b in history_bond_to_idx) {
+                    // If we have a reasonably deep number of confirmations, boot our pending TX which will clearly never be mined
+                    // TODO: We might want to keep this somewhere and display that it failed instead of just pretending your failed tx never happened
+                    var idx = history_bond_to_idx[b];
+                    var purge_block_count = 20;
+                    if (question['history'][idx].blockNumber + purge_block_count < CURRENT_BLOCK_NUMBER) {
+                        console.log('purging confirmed bond at level', b);
+                        clearPendingTXID(pending_entries_by_bond[b].txid, CHAIN_ID);
+                    } else {
+                        console.log('pending tx confirmed but not purging yet in case of reorg, will purge at ', question['history'][idx].blockNumber + purge_block_count, ', only at ', CURRENT_BLOCK_NUMBER, question['history'][idx]);
+                    }
+                    continue;
+                }
+                if (b in history_unconfirmed_bond_to_idx) {
+                    console.log('unconfirmed list already has pending tx', b);
+                    continue;
+                }
+                question['history_unconfirmed'].push(pending_entries_by_bond[b]);
+                console.log('added entry for bond', b);
+            }
+        }
+        return question;
+    }
+
+    function storePendingTXID(txid, chain_id) {
+        var MAX_PENDING_STORE = 20;
+        var ITEM_LENGTH = 66; // "0x" plus 32 hex characters
+        if (txid.length != ITEM_LENGTH) {
+            throw new Error("Unexpected txid length: " + txid);
+        }
+        var current = window.localStorage.getItem('tx-' + chain_id);
+        if (current) {
+            if (current.includes(txid)) {
+                return true;
+            }
+            // To avoid running over storage, if we have more than MAX_PENDING_STORE, bin the earliest tx
+            if (current.length > MAX_PENDING_STORE * ITEM_LENGTH) {
+                current = current.substr(ITEM_LENGTH);
+            }
+        } else {
+            current = '';
+        }
+        window.localStorage.setItem('tx-' + chain_id, current + txid);
+        return true;
+    }
+
+    function clearPendingTXID(txid, chain_id) {
+        console.log('clearPendingTXID', txid, chain_id);
+        var ITEM_LENGTH = 66; // "0x" plus 32 hex characters
+        if (txid.length != ITEM_LENGTH) {
+            throw new Error("Unexpected txid length: " + txid);
+        }
+        var current = window.localStorage.getItem('tx-' + chain_id);
+        window.localStorage.setItem('tx-' + chain_id, current.replace(txid, ''));
     }
 
     var ZINDEX = 10;
@@ -3783,13 +3944,16 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                         question['history'] = data;
                     }
                 }
+
+                question = mergeConfirmedTXes(question);
+
                 if (data.length && question['history_unconfirmed'].length) {
                     for (var j = 0; j < question['history_unconfirmed'].length; j++) {
                         var ubond = question['history_unconfirmed'][j].args.bond;
                         for (var i = 0; i < question['history'].length; i++) {
                             // If there's something unconfirmed with an equal or lower bond, remove it
                             if (data[i].args.bond.gte(ubond)) {
-                                // console.log('removing unconfirmed entry due to equal or higher bond from confirmed');
+                                console.log('removing unconfirmed entry due to equal or higher bond from confirmed');
                                 question['history_unconfirmed'].splice(j, 1);
                             }
                         }
@@ -6143,6 +6307,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     }
                     break;
                 case 'datetime':
+                    console.log('datetime is ', new_answer, ethers.BigNumber.from(new_answer).toString());
                     if (new_answer === null) {
                         var dt_container = parent_div.find('div.input-container.input-container--answer');
                         dt_container.addClass('is-error');
@@ -6178,6 +6343,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             var handleAnswerSubmit = function handleAnswerSubmit(tx_response) {
                 var txid = tx_response.hash;
+                storePendingTXID(txid, CHAIN_ID);
                 var contract = tx_response.to;
                 clearForm(parent_div, question_json);
                 var fake_history = {
@@ -6194,6 +6360,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                     'blockNumber': block_before_send,
                     'txid': txid
                 };
+
+                console.log('fillPendingUserTX', tx_response);
+                fillPendingUserTX(tx_response);
+                console.log('made PENDING_USER_TXES_BY_CQID', PENDING_USER_TXES_BY_CQID);
 
                 var question = filledQuestionDetail(contract, question_id, 'answers_unconfirmed', block_before_send, fake_history);
                 //console.log('after answer made question', question);
@@ -7899,6 +8069,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
 
             // NB If this fails we'll try again when we need to do something using the account
             getAccount(true);
+
+            loadPendingTransactions(cid);
 
             var _loop2 = function _loop2(i) {
                 var rcaddr = RC_DISPLAYED_CONTRACTS[i];
