@@ -1239,6 +1239,15 @@ module.exports={
                 "notes": null,
                 "arbitrators": {}
             }
+        },
+        "DEXE": {
+            "RealityETH_ERC20-3.0": {
+                "address": "0x95f8fc16C7Bd5a5b24CaE629471c6cCC3916826A",
+                "block": 13749748,
+                "token_address": "0x039cb485212f996a9dbb85a9a75d898f94d38da6",
+                "notes": null,
+                "arbitrators": {}
+            }
         }
     },
     "69": {
@@ -1474,6 +1483,13 @@ module.exports={
         "small_number": 1000000000000000000,
         "erc20_chains": {
             "4": "0x56AE5fd086823d1892BACE27034Eb5531Fcdc3f8"
+        }
+    },
+    "DEXE": {
+        "decimals": 18,
+        "small_number": 1000000000000000000,
+        "erc20_chains": {
+            "56": "0x039cb485212f996a9dbb85a9a75d898f94d38da6"
         }
     },
     "FOX": {
