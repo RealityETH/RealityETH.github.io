@@ -188,7 +188,13 @@ div.network-status-container {
     margin-top: -50px;
     margin-left: 71px;
     height:20px;
+    visibility:hidden;
 }
+div.network-status-container.initialized {
+    visibility:visible;
+}
+
+
 
 span.network-status {
     text-indent: 61px !important;
@@ -200,6 +206,28 @@ span.network-status {
     font-weight: normal;
     color: #939596;
 }   
+
+.via-node-only { display: none; }
+.via-graph-only { display: none; }
+body.via-node .via-node-only { display: inline; }
+body.via-graph .via-graph-only { display: inline; }
+
+body.via-node graph-node-switch-link {display:inline; }
+body.via-graph graph-node-switch-link {display:inline; }
+
+.graph-node-switch-link {
+    width: 240px;
+    height: 60px;
+    line-height: 60px;
+    margin: 15px 0 0;
+    padding: 9px;
+    border-radius: 3px;
+    font-size: 12px;
+    // background-color: $blue;
+    @include button_blue;
+    text-align: center;
+    cursor: pointer;
+}
 
 span.network-status.test-network {
     display: none;
@@ -1307,6 +1335,18 @@ footer .cols ul {
     color: $rcBrowserBodyText;
 }
 
+.chain-list-explanation {
+    line-height: 1.7;
+    font-size: 15px;
+    color: $rcBrowserBodyText;
+}
+
+div.graph-node-switch {
+    padding:12px;
+    margin-top:14px;
+    border-radius: 6px;
+    border: 1px solid $gray;
+}
 
 // rcBrowser header
 .rcbrowser-header {
@@ -2810,7 +2850,7 @@ body.error div.error-bar {
     text-align: center;
     z-index: 201;
     position: absolute;
-    top: 50%;
+    top: 25%;
     left: 50%;
     width: 400px;
     border-radius: 6px;
