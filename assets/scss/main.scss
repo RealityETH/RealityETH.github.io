@@ -3272,4 +3272,14 @@ input.datetime-input-time {
     display:block;
 }
 
+#chain-list-window .current-chain-text {
+    font-weight: bold;
+}
 
+.other-chain-list .chain-item.selected-chain {
+    display:none !important;
+}
+
+.current-chain-display {
+    font-size: 18px;
+}

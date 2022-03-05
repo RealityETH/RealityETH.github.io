@@ -7674,6 +7674,10 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
         $('.network-status' + net_cls).show();
         $('.network-status-container').addClass('initialized');
 
+        var current_chain_text = $('.network-status' + net_cls).text();
+        $('.current-chain-text').text(current_chain_text);
+        $('.chain-item.network-id-' + cid).addClass('selected-chain');
+
         if (typeof ethereum !== 'undefined') {
             ethereum.on('chainChanged', function () {
                 document.location.reload();

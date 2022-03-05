@@ -3817,3 +3817,12 @@ input.datetime-input-time {
 .has-time-input input.datetime-input-time {
   visibility: visible;
   display: block; }
+
+#chain-list-window .current-chain-text {
+  font-weight: bold; }
+
+.other-chain-list .chain-item.selected-chain {
+  display: none !important; }
+
+.current-chain-display {
+  font-size: 18px; }
