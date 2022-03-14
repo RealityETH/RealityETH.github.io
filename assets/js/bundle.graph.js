@@ -4296,6 +4296,8 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             }
         }
+
+        reflectDisplayEntryChanges();
     }
 
     // Inserts into the right place in the stored rankings.
@@ -6863,6 +6865,9 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
                 }
             }
         }
+
+        IS_INITIAL_LOAD_DONE = true;
+        reflectDisplayEntryChanges();
     }
 
     async function ensureQuestionDetailFetched(ctr, question_id, max_cache_ms) {
