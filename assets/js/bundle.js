@@ -1323,7 +1323,9 @@ module.exports={
                 "address": "0xE78996A233895bE74a66F451f1019cA9734205cc",
                 "block": 17997262,
                 "notes": null,
-                "arbitrators": {}
+                "arbitrators": {
+                    "0x29f39de98d750eb77b5fafb31b2837f079fce222": "Kleros"
+                }
             }
         }
     },
@@ -4750,6 +4752,7 @@ function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr
             }
 
             scheduleFinalizationDisplayUpdate(contract, question);
+            reflectDisplayEntryChanges();
             //console.log(DISPLAY_ENTRIES);
         }
     }
