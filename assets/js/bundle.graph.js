@@ -1075,6 +1075,15 @@ module.exports={
                 "arbitrators": {}
             }
         },
+        "SWISE": {
+            "RealityETH_ERC20-3.0": {
+                "address": "0x867092A32bC16816F12Fb326EfF7A2865E1ec138",
+                "block": 14485577,
+                "token_address": "0x48C3399719B582dD63eB5AADf12A40B4C3f52FA2",
+                "notes": null,
+                "arbitrators": {}
+            }
+        },
         "TRST": {
             "RealityETH_ERC20-2.0": {
                 "address": "0x3D3B51b1091d1F6491AeB1916C94BAfe57f6Cc9d",
@@ -1307,6 +1316,15 @@ module.exports={
                 "arbitrators": {}
             }
         },
+        "SWISE": {
+            "RealityETH_ERC20-3.0": {
+                "address": "0xC9FbdF0df8dE06Ad8d2193F7FA28bdA78c13a102",
+                "block": 21371853,
+                "token_address": "0xfdA94F056346d2320d4B5E468D6Ad099b2277746",
+                "notes": null,
+                "arbitrators": {}
+            }
+        },
         "XDAI": {
             "RealityETH-2.1": {
                 "address": "0x79e32aE03fb27B07C89c0c568F80287C01ca2E57",
@@ -1534,6 +1552,14 @@ module.exports={
         "small_number": 1000000000000000000,
         "erc20_chains": {
             "42": "0x222E11E134F9AB3750812b37F0DA51B4467EaA7a"
+        }
+    },
+    "SWISE": {
+        "decimals": 18,
+        "small_number": 1000000000000000000,
+        "erc20_chains": {
+            "1": "0x48C3399719B582dD63eB5AADf12A40B4C3f52FA2",
+            "100": "0xfdA94F056346d2320d4B5E468D6Ad099b2277746"
         }
     },
     "TRST": {
