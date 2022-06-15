@@ -727,7 +727,7 @@ module.exports={
     },
     "3": {
         "chainId": "0x3",
-        "chainName": "Ethereum Testnet Ropsten",
+        "chainName": "Ropsten",
         "nativeCurrency": {
             "name": "Ropsten Ether",
             "symbol": "ROP",
@@ -743,7 +743,7 @@ module.exports={
     },
     "4": {
         "chainId": "0x4",
-        "chainName": "Ethereum Testnet Rinkeby",
+        "chainName": "Rinkeby",
         "nativeCurrency": {
             "name": "Rinkeby Ether",
             "symbol": "RIN",
@@ -765,7 +765,6 @@ module.exports={
             "symbol": "UBQ",
             "decimals": 18
         },
-        "network_name": "mainnet",
         "rpcUrls": [
             "https://rpc.octano.dev",
             "https://pyrus2.ubiqscan.io"
@@ -778,13 +777,12 @@ module.exports={
     },
     "10": {
         "chainId": "0xa",
-        "chainName": "Optimistic Ethereum",
+        "chainName": "Optimism",
         "nativeCurrency": {
             "name": "Ether",
-            "symbol": "OETH",
+            "symbol": "ETH",
             "decimals": 18
         },
-        "network_name": "mainnet",
         "rpcUrls": [
             "https://mainnet.optimism.io/"
         ],
@@ -796,13 +794,13 @@ module.exports={
     },
     "42": {
         "chainId": "0x2a",
-        "chainName": "Ethereum Testnet Kovan",
+        "chainName": "Kovan",
         "nativeCurrency": {
             "name": "Kovan Ether",
             "symbol": "KOV",
             "decimals": 18
         },
-        "network_name": "kovan",
+        "network_name": "testnet",
         "rpcUrls": [
             "https://kovan.poa.network",
             "http://kovan.poa.network:8545",
@@ -847,7 +845,7 @@ module.exports={
     },
     "69": {
         "chainId": "0x45",
-        "chainName": "Optimistic Ethereum Testnet Kovan",
+        "chainName": "Optimism Kovan",
         "nativeCurrency": {
             "name": "Kovan Ether",
             "symbol": "KOR",
@@ -884,7 +882,7 @@ module.exports={
     },
     "100": {
         "chainId": "0x64",
-        "chainName": "xDAI Chain",
+        "chainName": "Gnosis",
         "nativeCurrency": {
             "name": "xDAI",
             "symbol": "xDAI",
@@ -892,21 +890,22 @@ module.exports={
         },
         "network_name": "xdai",
         "rpcUrls": [
-            "https://rpc.xdaichain.com",
+            "https://rpc.gnosischain.com",
             "https://xdai.poanetwork.dev",
-            "wss://rpc.xdaichain.com/wss",
-            "wss://xdai.poanetwork.dev/wss",
-            "http://xdai.poanetwork.dev",
             "https://dai.poa.network",
+            "https://rpc.ankr.com/gnosis",
+            "https://gnosischain-rpc.gateway.pokt.network",
+            "wss://rpc.gnosischain.com/wss",
+            "wss://xdai.poanetwork.dev/wss",
             "ws://xdai.poanetwork.dev:8546"
         ],
-        "hostedRPC": "https://rpc.xdaichain.com",
+        "hostedRPC": "https://rpc.gnosischain.com",
         "iconUrls": [
             "https://gblobscdn.gitbook.com/spaces%2F-Lpi9AHj62wscNlQjI-l%2Favatar.png"
         ],
         "graphURL": "https://api.thegraph.com/subgraphs/name/realityeth/realityeth-xdai",
         "blockExplorerUrls": [
-            "https://blockscout.com/poa/xdai",
+            "https://blockscout.com/xdai/mainnet",
             "https://blockscout.com/poa/xdai/"
         ]
     },
@@ -930,6 +929,7 @@ module.exports={
         "hostedRPC": "https://polygon-rpc.com/",
         "graphURL": "https://api.thegraph.com/subgraphs/name/realityeth/realityeth-polygon",
         "blockExplorerUrls": [
+            "https://polygonscan.com",
             "https://polygonscan.com/"
         ]
     },
@@ -970,7 +970,7 @@ module.exports={
     },
     "43114": {
         "chainId": "0xa86a",
-        "chainName": "Avalanche Mainnet",
+        "chainName": "Avalanche C-Chain",
         "nativeCurrency": {
             "name": "Avalanche",
             "symbol": "AVAX",
@@ -983,13 +983,13 @@ module.exports={
         "hostedRPC": "https://api.avax.network/ext/bc/C/rpc",
         "graphURL": "https://api.thegraph.com/subgraphs/name/realityeth/realityeth-ava",
         "blockExplorerUrls": [
-            "https://snowtrace.io/",
+            "https://snowtrace.io",
             "https://cchain.explorer.avax.network/"
         ]
     },
     "421611": {
         "chainId": "0x66eeb",
-        "chainName": "Arbitrum Testnet Rinkeby",
+        "chainName": "Arbitrum Rinkeby",
         "nativeCurrency": {
             "name": "Arbitrum Rinkeby Ether",
             "symbol": "ARETH",
@@ -997,17 +997,17 @@ module.exports={
         },
         "network_name": "arbitrum-rinkeby",
         "rpcUrls": [
-            "https://rinkeby.arbitrum.io/rpc",
-            "wss://rinkeby.arbitrum.io/ws"
+            "https://rinkeby.arbitrum.io/rpc"
         ],
         "hostedRPC": "https://rinkeby.arbitrum.io/rpc",
         "blockExplorerUrls": [
+            "https://testnet.arbiscan.io",
             "https://rinkeby-explorer.arbitrum.io"
         ]
     },
     "1337702": {
         "chainId": "0x146966",
-        "chainName": "Kintsugi merge testnet",
+        "chainName": "Kintsugi",
         "nativeCurrency": {
             "name": "kintsugi Ethere",
             "symbol": "kiETH",
@@ -1019,7 +1019,7 @@ module.exports={
         ],
         "hostedRPC": "https://rpc.kintsugi.themerge.dev",
         "blockExplorerUrls": [
-            "https://explorer.kintsugi.themerge.dev/"
+            "https://explorer.kintsugi.themerge.dev"
         ]
     }
 }
