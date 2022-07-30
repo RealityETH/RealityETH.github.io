@@ -104,6 +104,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#correcting-an-incorrect-answer">Correcting an incorrect answer</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#requesting-arbitration">Requesting arbitration</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reopening-questions">Reopening questions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#withdrawing-funds">Withdrawing funds</a></li>
 </ul>
 </li>
@@ -204,7 +205,7 @@
 <div class="section" id="question-type">
 <h3>Question Type<a class="headerlink" href="#question-type" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li><p>Binary (Yes/No): A simple yes or no answer. Note that this has no value for “null” or “undecided”. If you want to be able to report these options, you may prefer a multi-choice question.</p></li>
+<li><p>Binary (Yes/No): A simple yes or no answer.</p></li>
 <li><p>Number: A positive (unsigned) number. By default questions allow up to 13 decimals.</p></li>
 <li><p>Single-choice: One answer can be selected from a list. The answer form will display this as a select box.</p></li>
 <li><p>Multiple-choice: Multiple answers can be selected from a list. The answer form will display this as a group of checkboxes.</p></li>
@@ -259,6 +260,8 @@ If you are not in a hurry, you can usually set a much lower gas price than the d
 This will cause your transaction to fail.</p>
 <p>If the competing answer is also wrong, you may wish to resubmit your answer with an even higher bond.</p>
 </div>
+<p>Questions include an option for “invalid”, for if the question cannot be answered.</p>
+<p>As of version 3, questions may also include an option for “answered too soon”. You should select this answer if it was too soon to answer the question at the time the first answer was given, for instance because the question was about an event that had not happened yet.</p>
 </div>
 <div class="section" id="requesting-arbitration">
 <h2>Requesting arbitration<a class="headerlink" href="#requesting-arbitration" title="Permalink to this headline">¶</a></h2>
@@ -266,6 +269,10 @@ This will cause your transaction to fail.</p>
 <p>To request arbitration you must pay the arbitrator a fee. The fee may be quite high, and it will not be returned to you even if you are right. However, you will receive the bond posted with the incorrect answer. To make it profitable to request arbitration, you can increase your bond to the point where the person posting the incorrect answer will either give up, making your answer the winner, or post a bond that exceeds the amount you will have to pay the arbitrator.</p>
 <p>Once the arbitration fee has been paid the question will be locked, and the participants have to wait for the arbitrator to send their final answer to the contract.</p>
 <p>See <a class="reference internal" href="arbitrators.html"><span class="doc">Arbitrators</span></a> for more details on how the arbitration process works.</p>
+</div>
+<div class="section" id="reopening-questions">
+<h2>Reopening questions<a class="headerlink" href="#reopening-questions" title="Permalink to this headline">¶</a></h2>
+<p>A question that resolved as “answered too soon” can be reopened. This creates a new version of the question, and the question reward is transferred to the new question.</p>
 </div>
 <div class="section" id="withdrawing-funds">
 <h2>Withdrawing funds<a class="headerlink" href="#withdrawing-funds" title="Permalink to this headline">¶</a></h2>

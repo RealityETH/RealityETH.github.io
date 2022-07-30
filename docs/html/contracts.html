@@ -110,6 +110,7 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#custom-templates">Custom templates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#contract-addresses">Contract addresses</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="arbitrators.html">Arbitrators</a></li>
@@ -386,6 +387,18 @@
 </dd>
 </dl>
 <p>A template can be created by calling <code class="docutils literal notranslate"><span class="pre">createTemplate(&quot;template&quot;)</span></code>, where “template” is the JSON template. This returns a numerical ID. If you wish to reference particular template on code running on multiple networks with the same content, you may find it useful to call <code class="docutils literal notranslate"><span class="pre">template_hashes(bytes32</span> <span class="pre">template_hash)</span></code> to get the numerical ID.</p>
+</div>
+<div class="section" id="contract-addresses">
+<h2>Contract addresses<a class="headerlink" href="#contract-addresses" title="Permalink to this headline">¶</a></h2>
+<p>Each supported chain has a reality.eth contract instance per supported token.  Some chains have additional deployments for earlier versions.</p>
+<p>Each has its own configuration file like the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>reality.eth v3 for ETH on mainnet (chain ID 1): <a class="reference external" href="https://github.com/RealityETH/reality-eth-monorepo/blob/main/packages/contracts/chains/deployments/1/ETH/RealityETH-3.0.json">https://github.com/RealityETH/reality-eth-monorepo/blob/main/packages/contracts/chains/deployments/1/ETH/RealityETH-3.0.json</a></p></li>
+<li><p>reality.eth v3 for the GNO token on Gnosis chain (chain ID 100): <a class="reference external" href="https://github.com/RealityETH/reality-eth-monorepo/blob/main/packages/contracts/chains/deployments/100/GNO/RealityETH_ERC20-3.0.json">https://github.com/RealityETH/reality-eth-monorepo/blob/main/packages/contracts/chains/deployments/100/GNO/RealityETH_ERC20-3.0.json</a></p></li>
+</ul>
+</div></blockquote>
+<p>The configuration file may also include a list of known arbitrators that should be displayed in the UI. If you use an arbitrator not included in this list, a warning will be displayed in the dapp.</p>
 </div>
 </div>
 
