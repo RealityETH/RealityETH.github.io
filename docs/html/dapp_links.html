@@ -97,6 +97,9 @@
 <li class="toctree-l2"><a class="reference internal" href="#choosing-the-token">Choosing the token</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#specifying-the-contract">Specifying the contract</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#specifying-the-question">Specifying the question</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#specifying-the-question-creator">Specifying the question creator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#id1">Specifying the question creator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#specifying-the-question-template">Specifying the question template</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="audit.html">Audit</a></li>
@@ -200,6 +203,18 @@
 <p>For example, for a question on contract <code class="docutils literal notranslate"><span class="pre">0x3d00d77ee771405628a4ba4913175ecc095538da</span></code> you would use:
 <a class="reference external" href="https://reality.eth.link/app/index.html#!/question/0x3d00d77ee771405628a4ba4913175ecc095538da-0xf9d2c6cd9a1b21d8ec4829dbb1e7b49e951e8171465335907274434b2b762774">https://reality.eth.link/app/index.html#!/question/0x3d00d77ee771405628a4ba4913175ecc095538da-0xf9d2c6cd9a1b21d8ec4829dbb1e7b49e951e8171465335907274434b2b762774</a></p>
 <p>This will display your question using the contract to which it was posted, even if you do not otherwise specify the contract that should be displayed by the UI.</p>
+</div>
+<div class="section" id="specifying-the-question-creator">
+<h2>Specifying the question creator<a class="headerlink" href="#specifying-the-question-creator" title="Permalink to this headline">¶</a></h2>
+<p>You can filter to the creator of a question by supplying the <code class="docutils literal notranslate"><span class="pre">creator</span></code> parameter and its address. This is often useful when your questions are created by a contract.</p>
+</div>
+<div class="section" id="id1">
+<h2>Specifying the question creator<a class="headerlink" href="#id1" title="Permalink to this headline">¶</a></h2>
+<p>You can filter to a particular arbitrator by supplying the <code class="docutils literal notranslate"><span class="pre">arbitrator</span></code> parameter and its address.</p>
+</div>
+<div class="section" id="specifying-the-question-template">
+<h2>Specifying the question template<a class="headerlink" href="#specifying-the-question-template" title="Permalink to this headline">¶</a></h2>
+<p>You can filter to a particular question template by supplying the <code class="docutils literal notranslate"><span class="pre">template</span></code> parameter and the numerical ID of the template. You should also specify the <code class="docutils literal notranslate"><span class="pre">contract</span></code> parameter above, as a different contract may use the same numerical ID for a different template.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Prior to August, 2021, question IDs did not include the contract address. These are still supported, but if the <cite>contract</cite> parameter is not supplied, the dapp may not be able to tell which contract the question lives on.</p>
