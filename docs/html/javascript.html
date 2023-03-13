@@ -1,0 +1,319 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Using Reality.eth from JavaScript &mdash; reality.eth  documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Arbitrators" href="arbitrators.html" />
+    <link rel="prev" title="Using Reality.eth from a contract" href="contracts.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> reality.eth
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="dapp.html">Using the Reality.eth dapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contracts.html">Using Reality.eth from a contract</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Using Reality.eth from JavaScript</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#contract-deployments">Contract deployments</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#loading-the-contracts-for-your-network-token">Loading the contracts for your network / token</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-reality-eth-lib">Using reality-eth-lib</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#interpreting-a-question">Interpreting a question</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#creating-a-question">Creating a question</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="arbitrators.html">Arbitrators</a></li>
+<li class="toctree-l1"><a class="reference internal" href="fees.html">Fees and payments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whitepaper.html">White paper</a></li>
+<li class="toctree-l1"><a class="reference internal" href="contract_explanation.html">Contract Internals</a></li>
+<li class="toctree-l1"><a class="reference internal" href="dapp_links.html">Linking to the Reality.eth dapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="audit.html">Audit</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">reality.eth</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Using Reality.eth from JavaScript</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/javascript.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="using-reality-eth-from-javascript">
+<h1>Using Reality.eth from JavaScript<a class="headerlink" href="#using-reality-eth-from-javascript" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="contract-deployments">
+<h2>Contract deployments<a class="headerlink" href="#contract-deployments" title="Permalink to this headline">¶</a></h2>
+<p>You can find the reality.eth contract addresses under <a class="reference external" href="https://github.com/RealityETH/reality-eth-monorepo/tree/main/packages/contracts/chains/deployments">https://github.com/RealityETH/reality-eth-monorepo/tree/main/packages/contracts/chains/deployments</a> .</p>
+<p>For instance, the reality.eth v3 contract for mainnet (chain ID <cite>1</cite>) is shown in the file</p>
+<p><a class="reference external" href="https://github.com/RealityETH/reality-eth-monorepo/blob/main/packages/contracts/chains/deployments/1/ETH/RealityETH-3.0.json">https://github.com/RealityETH/reality-eth-monorepo/blob/main/packages/contracts/chains/deployments/1/ETH/RealityETH-3.0.json</a></p>
+<p>These are also stored in the <cite>&#64;reality.eth/contracts</cite> library. You can install them with</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>npm install --save @reality.eth/contracts
+</pre></div>
+</div>
+<p>You can load this library with</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">reality_eth_contracts</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;@reality.eth/contracts&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="section" id="loading-the-contracts-for-your-network-token">
+<h3>Loading the contracts for your network / token<a class="headerlink" href="#loading-the-contracts-for-your-network-token" title="Permalink to this headline">¶</a></h3>
+<p>You can check if a given <cite>chain_id</cite> is supported by calling</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="nx">reality_eth_contracts</span><span class="p">.</span><span class="nx">isChainSupported</span><span class="p">(</span><span class="nx">chain_id</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>We normally deploy a reality.eth contract for the native token on the chain (the token you pay gas with), and some chains may have additional contracts supporting different ERC20 tokens. You can get the name of the native token by calling <cite>reality_eth_contracts.defaultTokenForChain(chain_id)</cite>. On the Ethereum mainnet this will be <cite>ETH</cite>.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">token_ticker</span> <span class="o">=</span> <span class="nx">reality_eth_contracts</span><span class="p">.</span><span class="nx">defaultTokenForChain</span><span class="p">(</span><span class="nx">chain_id</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>The token may have multiple reality.eth contracts for different versions. You can read these with</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">my_configs</span> <span class="o">=</span> <span class="nx">reality_eth_contracts</span><span class="p">.</span><span class="nx">realityETHConfigs</span><span class="p">(</span><span class="nx">chain_id</span><span class="p">,</span> <span class="nx">token_ticker</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>If you know which version you want, you can pass this to get a single config, eg</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">my_config</span> <span class="o">=</span> <span class="nx">reality_eth_contracts</span><span class="p">.</span><span class="nx">realityETHConfig</span><span class="p">(</span><span class="nx">chain_id</span><span class="p">,</span> <span class="nx">token_ticker</span><span class="p">,</span> <span class="s1">&#39;3.0&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>To get an instance of the contract with the ABI populated, you can call</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">my_instance</span> <span class="o">=</span> <span class="nx">reality_eth_contracts</span><span class="p">.</span><span class="nx">realityETHInstance</span><span class="p">(</span><span class="nx">my_config</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>You can then create an instance in <cite>ethers.js</cite>, using a provider, with something like</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">my_instance</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ethers</span><span class="p">.</span><span class="nx">Contract</span><span class="p">(</span><span class="nx">my_instance</span><span class="p">.</span><span class="nx">address</span><span class="p">,</span> <span class="nx">my_instance</span><span class="p">.</span><span class="nx">abi</span><span class="p">,</span> <span class="nx">provider</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="using-reality-eth-lib">
+<h2>Using reality-eth-lib<a class="headerlink" href="#using-reality-eth-lib" title="Permalink to this headline">¶</a></h2>
+<p>We provide a library to help with formatting questions and parsing the answers.</p>
+<p>Although it is possible to format questions and handle the answers without using this library, we recommend that you use it where possible to ensure that your code matches what users will see if they interact with your questions on the reality.eth dapp or in other UI code.</p>
+<p>You can install this library with</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span>npm install --save @reality.eth/reality-eth-lib
+</pre></div>
+</div>
+<p>You can then import libraries for handling questions and templates.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">reality_eth_question</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;@reality.eth/reality-eth-lib&#39;</span><span class="p">).</span><span class="nx">question</span><span class="p">;</span>
+<span class="kd">const</span> <span class="nx">reality_eth_template</span> <span class="o">=</span> <span class="nx">require</span><span class="p">(</span><span class="s1">&#39;@reality.eth/reality-eth-lib&#39;</span><span class="p">).</span><span class="nx">template</span><span class="p">;</span>
+</pre></div>
+</div>
+<p>This library will help you handle the encoding and decoding of questions using templates. See <a class="reference internal" href="contracts.html"><span class="doc">Using Reality.eth from a contract</span></a> to understand how the template system works.</p>
+<div class="section" id="interpreting-a-question">
+<h3>Interpreting a question<a class="headerlink" href="#interpreting-a-question" title="Permalink to this headline">¶</a></h3>
+<p>A question stored on the blockchain consists of a template ID, with the body of the template in the logs for that template, and some encoded text.</p>
+<p>The template ID and question text are passed in as the first arguments of the <cite>askQuestion()</cite> function which creates questions.</p>
+<p>This data can be fetched from event logs: The question text is logged in the <cite>question</cite> field of the <cite>LogNewQuestion</cite> event, and the template ID in the <cite>template_id</cite> field. The text of the template can be found by looking up the <cite>LogNewTemplate</cite> event for the <cite>template_id</cite>, where it is found in the <cite>question_text</cite> field.</p>
+<p>It can also be fetched by querying our subgraph, for example
+<a class="reference external" href="https://thegraph.com/hosted-service/subgraph/realityeth/realityeth">https://thegraph.com/hosted-service/subgraph/realityeth/realityeth</a></p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
+  <span class="nx">questions</span><span class="p">(</span><span class="nx">first</span><span class="o">:</span> <span class="mf">5</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">data</span>
+    <span class="nx">template</span> <span class="p">{</span>
+      <span class="nx">questionText</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>Having populated the <cite>tmpl</cite> and <cite>qtext</cite> variables, the following will parse the text and populate a an object with the question <cite>title</cite>, <cite>type</cite> and any other fields it may have such as <cite>category</cite>.</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">q</span> <span class="o">=</span> <span class="nx">reality_eth_question</span><span class="p">.</span><span class="nx">populatedJSONForTemplate</span><span class="p">(</span><span class="nx">tmpl</span><span class="p">,</span> <span class="nx">qtext</span><span class="p">);</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="creating-a-question">
+<h3>Creating a question<a class="headerlink" href="#creating-a-question" title="Permalink to this headline">¶</a></h3>
+<p>Questions are created by calling the <cite>askQuestion</cite> method of the reality.eth contract. This requires a template ID and some parameters, stored in a string of text. The questions are formatted using an unusual delimiter character, “␟”. See <a class="reference internal" href="contracts.html"><span class="doc">Using Reality.eth from a contract</span></a> for more details on formatting. The <cite>encodeText</cite> function will handle formatting text for inclusion into a template.</p>
+<p>The supported types are <cite>bool</cite>, <cite>uint</cite>, <cite>single-select</cite>, <cite>multiple-select</cite>, <cite>datetime</cite>.</p>
+<p>Our built-in templates expect a type, the question title, a list of outcomes (for select types only), a category and a language. If your template expects the same parameters in the same order, you can use the following methods to format the text:</p>
+<div class="highlight-javascript notranslate"><div class="highlight"><pre><span></span><span class="kd">const</span> <span class="nx">qtext</span> <span class="o">=</span> <span class="nx">reality_eth_question</span><span class="p">.</span><span class="nx">encodeText</span><span class="p">(</span><span class="s1">&#39;bool&#39;</span><span class="p">,</span> <span class="s1">&#39;my title&#39;</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="s1">&#39;my-category&#39;</span><span class="p">,</span> <span class="s1">&#39;en_US&#39;</span><span class="p">);</span>
+
+<span class="kd">const</span> <span class="nx">qtext</span> <span class="o">=</span> <span class="nx">reality_eth_question</span><span class="p">.</span><span class="nx">encodeText</span><span class="p">(</span><span class="s1">&#39;multiple-select&#39;</span><span class="p">,</span> <span class="s1">&#39;my title&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;option1&quot;</span><span class="p">,</span> <span class="s2">&quot;option2&quot;</span><span class="p">],</span> <span class="s1">&#39;my-category&#39;</span><span class="p">);</span>
+<span class="kd">const</span> <span class="nx">qtext</span> <span class="o">=</span> <span class="nx">reality_eth_question</span><span class="p">.</span><span class="nx">encodeText</span><span class="p">(</span><span class="s1">&#39;single-select&#39;</span><span class="p">,</span> <span class="s1">&#39;my title&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;option1&quot;</span><span class="p">,</span> <span class="s2">&quot;option2&quot;</span><span class="p">],</span> <span class="s1">&#39;my-category&#39;</span><span class="p">);</span>
+</pre></div>
+</div>
+<p>If your template uses different parameters or parameters in a different order, you can pass them as an object with the keys appropriately ordered to <cite>encodeCustomText</cite>.</p>
+</div>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="arbitrators.html" class="btn btn-neutral float-right" title="Arbitrators" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="contracts.html" class="btn btn-neutral float-left" title="Using Reality.eth from a contract" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2017, KK Social Minds.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
