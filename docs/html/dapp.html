@@ -95,6 +95,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#arbitrator">Arbitrator</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#timeout">Timeout</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#category">Category</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#description">Description</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#answering-a-question">Answering a question</a><ul>
@@ -189,7 +190,7 @@
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
 <p>You will need the <a class="reference external" href="http://metamask.io/">Metamask</a> extension for Chrome or Firefox or a a browser with equivalent functionality like <a class="reference external" href="https://brave.com/">Brave</a>.</p>
 <p>To post or answer questions you will need ETH or the equivalent on the network you are on.</p>
-<p>If you prefer to try the app without using real money, you can switch Metamask to the Rinkeby or Kovan Testnet. You can get testnet coins at the <a class="reference external" href="https://faucet.rinkeby.io/">Rinkeby Faucet</a> and the <a class="reference external" href="https://faucet.kovan.network/">Kovan Faucet</a>.</p>
+<p>If you prefer to try the app without using real money, you can switch Metamask to the Sepolia Testnet.</p>
 </div>
 <div class="section" id="asking-a-question">
 <h2>Asking a question<a class="headerlink" href="#asking-a-question" title="Permalink to this headline">¶</a></h2>
@@ -211,6 +212,7 @@
 <li><p>Single-choice: One answer can be selected from a list. The answer form will display this as a select box.</p></li>
 <li><p>Multiple-choice: Multiple answers can be selected from a list. The answer form will display this as a group of checkboxes.</p></li>
 <li><p>Datetime: A date or date and time. The answer form will display this as a date picker.</p></li>
+<li><p>Hash (version 3.2 and higher, or version 2.2): A 32-byte hash. The answer form will display <cite>0x</cite> plus 64 hexadecimal characters.</p></li>
 </ul>
 <p>See <a class="reference internal" href="contracts.html"><span class="doc">Using Reality.eth from a contract</span></a> for how these values will be reported to contracts.</p>
 </div>
@@ -225,6 +227,12 @@
 <div class="section" id="category">
 <h3>Category<a class="headerlink" href="#category" title="Permalink to this headline">¶</a></h3>
 <p>This is intended to help people find questions of the subject they are interested in.</p>
+<p>This is removed in version 3.2.</p>
+</div>
+<div class="section" id="description">
+<h3>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h3>
+<p>A detailed description of the question. (This field is optional.)</p>
+<p>This was introduced in version 3.2.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Posting a question will open a MetaMask window which will prompt you to confirm it.
